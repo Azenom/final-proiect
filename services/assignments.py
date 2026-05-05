@@ -24,7 +24,6 @@ def assign_asset(asset_id, employee_id):
         # update asset
         cursor.execute("""
             UPDATE assets SET status = 'Assigned'
-
             WHERE id = ?
         """, (asset_id,))
 
@@ -92,7 +91,7 @@ def get_all_employees():
 
 def get_available_assets():
     conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row   # ⭐ important
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     cursor.execute("""
