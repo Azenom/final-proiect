@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Asset History</title>
+</head>
+<body>
+
+<h2>Asset History</h2>
+<button onclick="window.location.href='/assignments'">Back to Assignments</button>
+<br><br>
+<button onclick="window.location.href='/'">Back to Home</button>
+<br><br>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Employee</th>
+        <th>Assigned</th>
+        <th>Returned</th>
+        <th>Status</th>
+    </tr>
+
+    {% for row in history %}
+    <tr>
+        <td>{{ row["first_name"] }} {{ row["last_name"] }}</td>
+        <td>{{ row["assigned_date"] }}</td>
+        <td>{{ row["returned_date"] or "-" }}</td>
+        <td>{{ row["status"] }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+<br>
+
+</body>
+</html>

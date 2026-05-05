@@ -4,7 +4,9 @@ from services.assignments import (
     return_asset,
     get_all_employees,
     get_available_assets,
-    get_assignments
+    # get_assignments
+    get_active_assignments,
+    get_asset_history
 )
 
 def register_assignment_routes(app):
@@ -28,14 +30,18 @@ def register_assignment_routes(app):
             assets=assets
         )
 
-
     @app.route("/assignments")
     def list_assignments():
-        data = get_assignments()
-        return render_template("assignments/list.html", assignments=data)
-
+        sort_by = request.args.get("sort", "assigned_date")
+        data = get_active_assignments(sort_by)
+        return render_template("assignments/list.html",assignments=data)
 
     @app.route("/return/<int:assignment_id>")
     def return_asset_route(assignment_id):
         return_asset(assignment_id)
         return redirect(url_for("list_assignments"))
+
+    @app.route("/asset/<int:asset_id>")
+    def asset_history(asset_id):
+        history = get_asset_history(asset_id)
+        return render_template("assignments/history.html", history=history)

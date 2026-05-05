@@ -2,7 +2,6 @@ import sqlite3
 
 DB_PATH = "data/inventory.db"
 
-
 def assign_asset(asset_id, employee_id):
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
@@ -35,7 +34,6 @@ def assign_asset(asset_id, employee_id):
     finally:
         conn.close()
 
-
 def return_asset(assignment_id):
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
@@ -54,7 +52,7 @@ def return_asset(assignment_id):
         # Update assignment
         cursor.execute("""
             UPDATE assignments
-            SET returned_date = DATE('now'), status = 'Returned'
+            SET returned_date = DATE('now'), status = 'Available'
             WHERE id = ?
         """, (assignment_id,))
 
@@ -73,7 +71,6 @@ def return_asset(assignment_id):
     finally:
         conn.close()
 
-
 def get_all_employees():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -87,7 +84,6 @@ def get_all_employees():
     data = cursor.fetchall()
     conn.close()
     return data
-
 
 def get_available_assets():
     conn = sqlite3.connect(DB_PATH)
@@ -104,14 +100,23 @@ def get_available_assets():
     conn.close()
     return data
 
-def get_assignments():
+def get_active_assignments(sort_by="assigned_date"):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
-    cursor.execute("""
+    allowed_sort = {
+        "date": "assignments.assigned_date",
+        "name": "employees.first_name",
+        "category": "assets.category"
+    }
+
+    sort_column = allowed_sort.get(sort_by, "assignments.assigned_date")
+
+    query = f"""
         SELECT 
             assignments.id AS assignment_id,
+            assets.id AS asset_id,
             assets.category,
             assets.brand,
             assets.serial_number,
@@ -122,7 +127,33 @@ def get_assignments():
         FROM assignments
         JOIN assets ON assignments.asset_id = assets.id
         JOIN employees ON assignments.employee_id = employees.id
-    """)
+        WHERE assignments.status = 'Active'
+        ORDER BY {sort_column}
+    """
+
+    cursor.execute(query)
+
+    data = cursor.fetchall()
+    conn.close()
+    return data
+
+def get_asset_history(asset_id):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            employees.first_name,
+            employees.last_name,
+            assignments.assigned_date,
+            assignments.returned_date,
+            assignments.status
+        FROM assignments
+        JOIN employees ON assignments.employee_id = employees.id
+        WHERE assignments.asset_id = ?
+        ORDER BY assignments.assigned_date DESC
+    """, (asset_id,))
 
     data = cursor.fetchall()
     conn.close()

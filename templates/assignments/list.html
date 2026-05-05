@@ -5,7 +5,19 @@
 </head>
 <body>
 
-<h2>Assignments</h2>
+<h2>Active Assignments</h2>
+
+<button onclick="window.location.href='/'">Back to Home</button>
+
+<br><br>
+
+<h3>Sort by:</h3>
+
+<a href="/assignments?sort=date">Date</a> |
+<a href="/assignments?sort=name">Employee</a> |
+<a href="/assignments?sort=category">Category</a>
+
+<br><br>
 
 <table border="1" cellpadding="8">
     <tr>
@@ -19,31 +31,19 @@
 
     {% for row in assignments %}
     <tr>
-        <!-- Assignment ID -->
         <td>{{ row["assignment_id"] }}</td>
-
-        <!-- Asset details -->
         <td>
-            {{ row["category"] }} - {{ row["brand"] }}<br>
+            <b>{{ row["category"] }}</b><br>
+            {{ row["brand"] }}<br>
             <small>SN: {{ row["serial_number"] }}</small>
         </td>
-
-        <!-- Employee -->
         <td>{{ row["first_name"] }} {{ row["last_name"] }}</td>
-
-        <!-- Date -->
         <td>{{ row["assigned_date"] }}</td>
-
-        <!-- Status -->
         <td>{{ row["status"] }}</td>
-
-        <!-- Action -->
         <td>
-            {% if row["status"] == "Active" %}
-                <a href="/return/{{ row['assignment_id'] }}">Return</a>
-            {% else %}
-                -
-            {% endif %}
+            <a href="/return/{{ row['assignment_id'] }}">Return</a>
+            <br>
+            <a href="/asset/{{ row['asset_id'] }}">View History</a>
         </td>
     </tr>
     {% endfor %}
