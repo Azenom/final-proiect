@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assignments</title>
+</head>
+<body>
+
+<h2>Assignments</h2>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>ID</th>
+        <th>Asset</th>
+        <th>Employee</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for row in assignments %}
+    <tr>
+        <!-- Assignment ID -->
+        <td>{{ row["assignment_id"] }}</td>
+
+        <!-- Asset details -->
+        <td>
+            {{ row["category"] }} - {{ row["brand"] }}<br>
+            <small>SN: {{ row["serial_number"] }}</small>
+        </td>
+
+        <!-- Employee -->
+        <td>{{ row["first_name"] }} {{ row["last_name"] }}</td>
+
+        <!-- Date -->
+        <td>{{ row["assigned_date"] }}</td>
+
+        <!-- Status -->
+        <td>{{ row["status"] }}</td>
+
+        <!-- Action -->
+        <td>
+            {% if row["status"] == "Active" %}
+                <a href="/return/{{ row['assignment_id'] }}">Return</a>
+            {% else %}
+                -
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>

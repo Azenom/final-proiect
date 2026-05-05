@@ -1,0 +1,28 @@
+<h2>Assign Device</h2>
+
+<form method="POST">
+
+    <label>Employee:</label>
+    <select name="employee_id" required>
+        {% for emp in employees %}
+            <option value="{{ emp['id'] }}">
+                {{ emp['first_name'] }} {{ emp['last_name'] }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <br><br>
+
+    <label>Select available device:</label>
+    <select name="asset_id" required>
+        {% for asset in assets %}
+            <option value="{{ asset['id'] }}">
+                {{ asset['category'] }} - {{ asset['brand'] }} (SN: {{ asset['serial_number'] }})
+            </option>
+        {% endfor %}
+    </select>
+
+    <br><br>
+
+    <button type="submit">Assign</button>
+</form>
