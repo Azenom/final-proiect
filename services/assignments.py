@@ -158,3 +158,19 @@ def get_asset_history(asset_id):
     data = cursor.fetchall()
     conn.close()
     return data
+
+def get_asset_details(asset_id):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT category, brand, serial_number, status
+        FROM assets
+        WHERE id = ?
+    """, (asset_id,))
+
+    asset = cursor.fetchone()
+    conn.close()
+    return asset
+

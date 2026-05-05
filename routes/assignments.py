@@ -4,9 +4,9 @@ from services.assignments import (
     return_asset,
     get_all_employees,
     get_available_assets,
-    # get_assignments
     get_active_assignments,
-    get_asset_history
+    get_asset_history,
+    get_asset_details
 )
 
 def register_assignment_routes(app):
@@ -44,4 +44,5 @@ def register_assignment_routes(app):
     @app.route("/asset/<int:asset_id>")
     def asset_history(asset_id):
         history = get_asset_history(asset_id)
-        return render_template("assignments/history.html", history=history)
+        asset = get_asset_details(asset_id)
+        return render_template("assignments/history.html", history=history, asset=asset)

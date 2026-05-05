@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Asset</title>
+</head>
+<body>
+
+<h2>Edit Asset</h2>
+
+<a href="/assets/add">← Back to Assets</a>
+<br><br>
+
+<form method="POST">
+
+    <label>Category:</label><br>
+    <input name="category" value="{{ asset['category'] }}" required>
+    <br><br>
+
+    <label>Brand:</label><br>
+    <input name="brand" value="{{ asset['brand'] }}" required>
+    <br><br>
+
+    <label>Serial Number:</label><br>
+    <input name="serial_number" value="{{ asset['serial_number'] }}" required>
+    <br><br>
+
+    <label>Status:</label><br>
+    <select name="status">
+        <option value="Available" {% if asset["status"] == "Available" %}selected{% endif %}>Available</option>
+        <option value="Assigned" {% if asset["status"] == "Assigned" %}selected{% endif %}>Assigned</option>
+        <option value="Service" {% if asset["status"] == "Service" %}selected{% endif %}>Service</option>
+    </select>
+
+    <br><br>
+
+    <button type="submit">Save Changes</button>
+
+</form>
+
+</body>
+</html>

@@ -9,7 +9,16 @@
 <button onclick="window.location.href='/assignments'">Back to Assignments</button>
 <br><br>
 <button onclick="window.location.href='/'">Back to Home</button>
-<br><br>
+
+<hr>
+<h3>
+    {{ asset["category"] }} - {{ asset["brand"] }}
+</h3>
+<p>
+    <b>Serial:</b> {{ asset["serial_number"] }}<br>
+    <b>Status:</b> {{ asset["status"] }}
+</p>
+<hr>
 
 <table border="1" cellpadding="8">
     <tr>
@@ -29,8 +38,6 @@
     {% endfor %}
 
 </table>
-
-<br>
 
 </body>
 </html>

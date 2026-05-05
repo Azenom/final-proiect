@@ -16,3 +16,34 @@
     <button type="submit">Add Asset</button>
 </form>
     <button onclick="window.location.href='/'">Back to Home</button>
+
+<hr>
+
+<h2>All Assets</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Asset</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for asset in assets %}
+    <tr>
+        <td>{{ asset["id"] }}</td>
+
+        <td>
+            {{ asset["category"] }} - {{ asset["brand"] }}<br>
+            SN: {{ asset["serial_number"] }}
+        </td>
+
+        <td>{{ asset["status"] }}</td>
+
+        <td>
+            <a href="/assets/edit/{{ asset['id'] }}">Edit</a> |
+            <a href="/assets/delete/{{ asset['id'] }}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
