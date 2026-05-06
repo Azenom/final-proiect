@@ -1,33 +1,86 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Inventory System</title>
+    <title>Inventory Management System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h1>Inventory Management System</h1>
+<div class="container">
 
-<hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-<h2>Dashboard</h2>
+    <h1>Inventory Management System</h1>
 
-<ul>
-    <li>Total Employees: {{ employees }}</li>
-    <li>Total Assets: {{ assets }}</li>
-    <li>Available Assets: {{ available }}</li>
-    <li>Assigned Assets: {{ assigned }}</li>
-</ul>
+    <p>
+        Manage employees, assets and assignments from one place.
+    </p>
 
-<hr>
+    <h2>Dashboard</h2>
 
-<h3>Navigation</h3>
+    <div class="cards">
 
-<ul>
-    <li><a href="/employees/add">Add Employee</a></li>
-    <li><a href="/assets/add">Assets</a></li>
-    <li><a href="/assign">Assign Asset</a></li>
-    <li><a href="/assignments">View Assignments</a></li>
-</ul>
+        <div class="card">
+            <h3>Total Employees</h3>
+            <p>{{ employees }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Assets</h3>
+            <p>{{ assets }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Available Assets</h3>
+            <p>{{ available }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Assigned Assets</h3>
+            <p>{{ assigned }}</p>
+        </div>
+
+    </div>
+
+    <h2>Navigation</h2>
+
+    <div class="nav-grid">
+
+        <a href="/employees/add" class="nav-card">
+            Employees
+        </a>
+
+        <a href="/assets/add" class="nav-card">
+            Assets
+        </a>
+
+        <a href="/assign" class="nav-card">
+            Assign Asset
+        </a>
+
+        <a href="/assignments" class="nav-card">
+            View Assignments
+        </a>
+
+        <a href="/export" class="nav-card">
+            Export to Excel
+        </a>
+
+    </div>
+
+</div>
 
 </body>
 </html>

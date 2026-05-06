@@ -1,41 +1,100 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Edit Asset</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<h2>Edit Asset</h2>
+<div class="container">
 
-<a href="/assets/add">← Back to Assets</a>
-<br><br>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-<form method="POST">
+    <div class="page-header">
 
-    <label>Category:</label><br>
-    <input name="category" value="{{ asset['category'] }}" required>
-    <br><br>
+        <h1>Edit Asset</h1>
 
-    <label>Brand:</label><br>
-    <input name="brand" value="{{ asset['brand'] }}" required>
-    <br><br>
+        <a href="/assets/add" class="btn">
+            Back to Assets
+        </a>
 
-    <label>Serial Number:</label><br>
-    <input name="serial_number" value="{{ asset['serial_number'] }}" required>
-    <br><br>
+    </div>
 
-    <label>Status:</label><br>
-    <select name="status">
-        <option value="Available" {% if asset["status"] == "Available" %}selected{% endif %}>Available</option>
-        <option value="Assigned" {% if asset["status"] == "Assigned" %}selected{% endif %}>Assigned</option>
-        <option value="Service" {% if asset["status"] == "Service" %}selected{% endif %}>Service</option>
-    </select>
+    <form method="POST">
 
-    <br><br>
+        <label>Category:</label>
 
-    <button type="submit">Save Changes</button>
+        <input
+            name="category"
+            value="{{ asset['category'] }}"
+            required
+        >
 
-</form>
+        <br><br>
+
+        <label>Brand:</label>
+
+        <input
+            name="brand"
+            value="{{ asset['brand'] }}"
+            required
+        >
+
+        <br><br>
+
+        <label>Serial Number:</label>
+
+        <input
+            name="serial_number"
+            value="{{ asset['serial_number'] }}"
+            required
+        >
+
+        <br><br>
+
+        <label>Status:</label>
+
+        <select name="status">
+
+            <option value="Available"
+                {% if asset["status"] == "Available" %}
+                    selected
+                {% endif %}
+            >
+                Available
+            </option>
+
+            <option value="Service"
+                {% if asset["status"] == "Service" %}
+                    selected
+                {% endif %}
+            >
+                Service
+            </option>
+
+        </select>
+
+        <br><br>
+
+        <button type="submit">
+            Save Changes
+        </button>
+
+    </form>
+
+</div>
 
 </body>
 </html>

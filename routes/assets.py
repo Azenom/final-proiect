@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from services.add_assets import add_asset, get_all_assets, delete_asset, update_asset, get_asset_by_id, import_assets_from_csv
 import os
 
@@ -14,6 +14,7 @@ def register_asset_routes(app):
             serial_number = request.form["serial_number"]
             purchase_date = request.form["purchase_date"]
             add_asset(category, brand, serial_number, purchase_date)
+            flash("✅ Asset added successfully")
             return redirect(url_for("add_asset_route"))
 
         # CSV import
@@ -23,6 +24,7 @@ def register_asset_routes(app):
                 upload_path = "temp_assets.csv"
                 file.save(upload_path)
                 import_assets_from_csv(upload_path)
+                flash("✅ Assets imported successfully")
                 os.remove(upload_path)
             return redirect(url_for("add_asset_route"))
         
@@ -32,6 +34,7 @@ def register_asset_routes(app):
     @app.route("/assets/delete/<int:asset_id>")
     def delete_asset_route(asset_id):
         delete_asset(asset_id)
+        flash("✅ Asset deleted")
         return redirect(url_for("add_asset_route"))
     
     @app.route("/assets/edit/<int:asset_id>", methods=["GET", "POST"])
@@ -42,6 +45,7 @@ def register_asset_routes(app):
             serial = request.form["serial_number"]
             status = request.form["status"]
             update_asset(asset_id, category, brand, serial, status)
+            flash("✅ Asset updated successfully")
             return redirect(url_for("add_asset_route"))
 
         asset = get_asset_by_id(asset_id)

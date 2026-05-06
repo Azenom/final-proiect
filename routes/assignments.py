@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from services.assignments import (
     assign_asset,
     return_asset,
@@ -16,19 +16,13 @@ def register_assignment_routes(app):
         if request.method == "POST":
             asset_id = request.form["asset_id"]
             employee_id = request.form["employee_id"]
-
             assign_asset(asset_id, employee_id)
-
+            flash("✅ Asset assigned successfully")
             return redirect(url_for("assign_asset_route"))
 
         employees = get_all_employees()
         assets = get_available_assets()
-
-        return render_template(
-            "assignments/assign.html",
-            employees=employees,
-            assets=assets
-        )
+        return render_template("assignments/assign.html", employees=employees, assets=assets)
 
     @app.route("/assignments")
     def list_assignments():
@@ -39,6 +33,7 @@ def register_assignment_routes(app):
     @app.route("/return/<int:assignment_id>")
     def return_asset_route(assignment_id):
         return_asset(assignment_id)
+        flash("✅ Asset returned successfully")
         return redirect(url_for("list_assignments"))
 
     @app.route("/asset/<int:asset_id>")

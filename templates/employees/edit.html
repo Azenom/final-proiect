@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Edit Employee</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="page-header">
+
+        <h1>Edit Employee</h1>
+
+        <a href="/employees/add" class="btn">
+            Back to Employees
+        </a>
+
+    </div>
+
+    <form method="POST">
+
+        <label>First Name:</label>
+
+        <input
+            name="first_name"
+            value="{{ employee['first_name'] }}"
+            required
+        >
+
+        <br><br>
+
+        <label>Last Name:</label>
+
+        <input
+            name="last_name"
+            value="{{ employee['last_name'] }}"
+            required
+        >
+
+        <br><br>
+
+        <label>Department:</label>
+
+        <input
+            name="department"
+            value="{{ employee['department'] }}"
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Save Changes
+        </button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

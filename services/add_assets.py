@@ -86,13 +86,15 @@ def update_asset(asset_id, category, brand, serial, status):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
+    
     if status == "Service":
+        # close active assignment
         cursor.execute("""
             UPDATE assignments
             SET status='Returned', returned_date=DATE('now')
             WHERE asset_id=? AND status='Active'
         """, (asset_id,))
-
+        
     cursor.execute("""
         UPDATE assets
         SET category=?, brand=?, serial_number=?, status=?
@@ -101,3 +103,9 @@ def update_asset(asset_id, category, brand, serial, status):
 
     conn.commit()
     conn.close()
+
+
+
+
+    #####
+    

@@ -54,7 +54,7 @@ def return_asset(assignment_id):
         # Update assignment
         cursor.execute("""
             UPDATE assignments
-            SET returned_date = DATE('now'), status = 'Available'
+            SET returned_date = DATE('now'), status = 'Returned'
             WHERE id = ?
         """, (assignment_id,))
 

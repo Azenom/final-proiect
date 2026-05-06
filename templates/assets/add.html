@@ -1,55 +1,165 @@
-<h2>Add Asset</h2>
+<!DOCTYPE html>
+<html>
 
-<form method="POST">
-    <label>Category:</label>
-    <input type="text" name="category"><br>
-    <br>
-    <label>Brand:</label>
-    <input type="text" name="brand"><br>
-    <br>
-    <label>Serial Number:</label>
-    <input type="text" name="serial_number"><br>
-    <br>
-    <label>Purchase Date:</label>
-    <input type="date" name="purchase_date"><br>
-    <br>
-    <button type="submit">Add Asset</button>
-</form>
-    <button onclick="window.location.href='/'">Back to Home</button>
+<head>
+    <title>Assets</title>
 
-<hr>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
 
-<h2>Import Assets from CSV -> Format : ( category,brand,serial_number,purchase_date )</h2>
+<body>
 
-<form method="POST" enctype="multipart/form-data">
-    <input type="file" name="csv_file" accept=".csv" required>
-    <br><br>
-    <button type="submit" name="import_csv">Import CSV</button>
-</form>
+<div class="container">
 
-<hr>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-<h2>All Assets</h2>
+    <div class="page-header">
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Asset</th>
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
-    {% for asset in assets %}
-    <tr>
-        <td>{{ asset["id"] }}</td>
-        <td>
-            {{ asset["category"] }} - {{ asset["brand"] }}<br>
-            SN: {{ asset["serial_number"] }}
-        </td>
-        <td>{{ asset["status"] }}</td>
-        <td>
-            <a href="/assets/edit/{{ asset['id'] }}">Edit</a> |
-            <a href="/assets/delete/{{ asset['id'] }}">Delete</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+        <h1>Assets</h1>
+
+        <a href="/" class="btn">
+            Back to Home
+        </a>
+
+    </div>
+
+    <h2>Add Asset</h2>
+
+    <form method="POST">
+
+        <label>Category:</label>
+
+        <input type="text"
+               name="category"
+               required>
+
+        <br><br>
+
+        <label>Brand:</label>
+
+        <input type="text"
+               name="brand"
+               required>
+
+        <br><br>
+
+        <label>Serial Number:</label>
+
+        <input type="text"
+               name="serial_number"
+               required>
+
+        <br><br>
+
+        <label>Purchase Date:</label>
+
+        <input type="date"
+               name="purchase_date">
+
+        <br><br>
+
+        <button type="submit">
+            Add Asset
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Import Assets from CSV</h2>
+
+    <p>
+        Format:
+        category,brand,serial_number,purchase_date
+    </p>
+
+    <form method="POST"
+          enctype="multipart/form-data">
+
+        <input type="file"
+               name="csv_file"
+               accept=".csv"
+               required>
+
+        <br><br>
+
+        <button type="submit"
+                name="import_csv">
+            Import CSV
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>All Assets</h2>
+
+    <table>
+
+        <tr>
+            <th>ID</th>
+            <th>Asset</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+
+        {% for asset in assets %}
+
+        <tr>
+
+            <td>
+                {{ asset["id"] }}
+            </td>
+
+            <td>
+
+                {{ asset["category"] }}
+                -
+                {{ asset["brand"] }}
+
+                <br>
+
+                <small>
+                    SN:
+                    {{ asset["serial_number"] }}
+                </small>
+
+            </td>
+
+            <td>
+                {{ asset["status"] }}
+            </td>
+
+            <td>
+
+                <a href="/assets/edit/{{ asset['id'] }}">
+                    Edit
+                </a>
+
+                |
+
+                <a href="/assets/delete/{{ asset['id'] }}">
+                    Delete
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+</div>
+
+</body>
+</html>
