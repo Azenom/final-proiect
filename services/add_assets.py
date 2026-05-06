@@ -7,7 +7,6 @@ def add_asset(category, brand, serial_number, purchase_date):
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
-
     try:
         cursor.execute("""
             INSERT INTO assets (
@@ -18,37 +17,36 @@ def add_asset(category, brand, serial_number, purchase_date):
             )
             VALUES (?, ?, ?, ?)
         """, (category, brand, serial_number, purchase_date))
-
         conn.commit()
         print("✅ Asset added successfully!")
-
     except sqlite3.IntegrityError as e:
         print("❌ Error:", e)
-
     finally:
         conn.close()
 
 def import_assets_from_csv(file_path):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-
     with open(file_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            cursor.execute("""
-                INSERT INTO assets (
-                    category,
-                    brand,
-                    serial_number,
-                    purchase_date
-                )
-                VALUES (?, ?, ?, ?)
-            """, (
-                row["category"],
-                row["brand"],
-                row["serial_number"],
-                row["purchase_date"]
-            ))
+            try:
+                cursor.execute("""
+                    INSERT INTO assets (
+                        category,
+                        brand,
+                        serial_number,
+                        purchase_date
+                    )
+                    VALUES (?, ?, ?, ?)
+                """, (
+                    row["category"],
+                    row["brand"],
+                    row["serial_number"],
+                    row["purchase_date"]
+                ))
+            except sqlite3.IntegrityError:
+                print(f"Skipped duplicate: {row['serial_number']}")
     conn.commit()
     conn.close()
 
@@ -85,8 +83,6 @@ def delete_asset(asset_id):
 def update_asset(asset_id, category, brand, serial, status):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
-    
     if status == "Service":
         # close active assignment
         cursor.execute("""
@@ -103,9 +99,3 @@ def update_asset(asset_id, category, brand, serial, status):
 
     conn.commit()
     conn.close()
-
-
-
-
-    #####
-    
