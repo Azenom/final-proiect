@@ -1,4 +1,5 @@
 import sqlite3
+import csv
 
 DB_PATH = "data/inventory.db"
 
@@ -26,6 +27,30 @@ def add_asset(category, brand, serial_number, purchase_date):
 
     finally:
         conn.close()
+
+def import_assets_from_csv(file_path):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    with open(file_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            cursor.execute("""
+                INSERT INTO assets (
+                    category,
+                    brand,
+                    serial_number,
+                    purchase_date
+                )
+                VALUES (?, ?, ?, ?)
+            """, (
+                row["category"],
+                row["brand"],
+                row["serial_number"],
+                row["purchase_date"]
+            ))
+    conn.commit()
+    conn.close()
 
 def get_all_assets():
     conn = sqlite3.connect(DB_PATH)

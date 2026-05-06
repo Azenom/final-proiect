@@ -1,4 +1,6 @@
 import sqlite3
+from models.asset import Asset
+from models.employee import Employee
 
 DB_PATH = "data/inventory.db"
 
@@ -144,8 +146,10 @@ def get_asset_history(asset_id):
 
     cursor.execute("""
         SELECT 
+            employees.id AS employee_id,
             employees.first_name,
             employees.last_name,
+            employees.department,
             assignments.assigned_date,
             assignments.returned_date,
             assignments.status
@@ -155,9 +159,25 @@ def get_asset_history(asset_id):
         ORDER BY assignments.assigned_date DESC
     """, (asset_id,))
 
-    data = cursor.fetchall()
+    rows = cursor.fetchall()
+    history = []
+
+    for row in rows:
+        employee = Employee(
+            row["employee_id"],
+            row["first_name"],
+            row["last_name"],
+            row["department"]
+        )
+        history.append({
+            "employee": employee,
+            "assigned_date": row["assigned_date"],
+            "returned_date": row["returned_date"],
+            "status": row["status"]
+        })
+
     conn.close()
-    return data
+    return history
 
 def get_asset_details(asset_id):
     conn = sqlite3.connect(DB_PATH)
@@ -165,12 +185,21 @@ def get_asset_details(asset_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT category, brand, serial_number, status
+        SELECT *
         FROM assets
         WHERE id = ?
     """, (asset_id,))
 
-    asset = cursor.fetchone()
+    row = cursor.fetchone()
     conn.close()
-    return asset
+
+    if row:
+        return Asset(
+            row["id"],
+            row["category"],
+            row["brand"],
+            row["serial_number"],
+            row["status"]
+        )
+    return None
 

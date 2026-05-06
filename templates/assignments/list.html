@@ -11,7 +11,7 @@
 
 <br><br>
 
-<h3>Sort by:</h3>
+<h2>Sort by:</h2>
 
 <a href="/assignments?sort=date">Date</a> |
 <a href="/assignments?sort=name">Employee</a> |
@@ -28,7 +28,6 @@
         <th>Status</th>
         <th>Action</th>
     </tr>
-
     {% for row in assignments %}
     <tr>
         <td>{{ row["assignment_id"] }}</td>
@@ -47,8 +46,6 @@
         </td>
     </tr>
     {% endfor %}
-
 </table>
-
 </body>
 </html>

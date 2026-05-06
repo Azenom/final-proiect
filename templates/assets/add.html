@@ -19,6 +19,16 @@
 
 <hr>
 
+<h2>Import Assets from CSV -> Format : ( category,brand,serial_number,purchase_date )</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="csv_file" accept=".csv" required>
+    <br><br>
+    <button type="submit" name="import_csv">Import CSV</button>
+</form>
+
+<hr>
+
 <h2>All Assets</h2>
 
 <table border="1">
@@ -28,18 +38,14 @@
         <th>Status</th>
         <th>Actions</th>
     </tr>
-
     {% for asset in assets %}
     <tr>
         <td>{{ asset["id"] }}</td>
-
         <td>
             {{ asset["category"] }} - {{ asset["brand"] }}<br>
             SN: {{ asset["serial_number"] }}
         </td>
-
         <td>{{ asset["status"] }}</td>
-
         <td>
             <a href="/assets/edit/{{ asset['id'] }}">Edit</a> |
             <a href="/assets/delete/{{ asset['id'] }}">Delete</a>

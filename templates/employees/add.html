@@ -13,3 +13,13 @@
     <button type="submit">Add Employee</button>
 </form>
 <button onclick="window.location.href='/'">Back to Home</button>
+
+<hr>
+
+<h2>Import Employees from CSV -> Format : ( first_name,last_name,department )</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="csv_file" accept=".csv" required>
+    <br><br>
+    <button type="submit" name="import_csv">Import CSV</button>
+</form>
