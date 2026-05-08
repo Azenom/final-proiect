@@ -14,8 +14,11 @@ def register_assignment_routes(app):
     @app.route("/assign", methods=["GET", "POST"])
     def assign_asset_route():
         if request.method == "POST":
-            asset_id = request.form["asset_id"]
-            employee_id = request.form["employee_id"]
+            employee_id = request.form["employee_id"].strip()
+            asset_id = request.form["asset_id"].strip()
+            if not employee_id or not asset_id:
+                flash("❌ Please fill all required fields")
+                return redirect(url_for("assign_asset_route"))
             assign_asset(asset_id, employee_id)
             flash("✅ Asset assigned successfully")
             return redirect(url_for("assign_asset_route"))

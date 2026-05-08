@@ -27,9 +27,24 @@ def add_asset(category, brand, serial_number, purchase_date):
 def import_assets_from_csv(file_path):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+
     with open(file_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
+        required_columns = ["category","brand","serial_number","purchase_date"]
+
+        if not reader.fieldnames:
+            conn.close()
+            raise Exception("❌ CSV file is empty")
+
+        missing = [col for col in required_columns if col not in reader.fieldnames]
+        if missing:
+            conn.close()
+            raise Exception(f"❌ Missing columns: {', '.join(missing)}")
+
         for row in reader:
+            if (not row["category"].strip() or not row["brand"].strip() or not row["serial_number"].strip()):
+                print("❌ Skipped invalid asset row")
+                continue
             try:
                 cursor.execute("""
                     INSERT INTO assets (
@@ -39,14 +54,11 @@ def import_assets_from_csv(file_path):
                         purchase_date
                     )
                     VALUES (?, ?, ?, ?)
-                """, (
-                    row["category"],
-                    row["brand"],
-                    row["serial_number"],
-                    row["purchase_date"]
-                ))
+                """, (row["category"],row["brand"],row["serial_number"],row["purchase_date"]))
+
             except sqlite3.IntegrityError:
-                print(f"Skipped duplicate: {row['serial_number']}")
+                print(f"Skipped duplicate: "f"{row['serial_number']}")
+
     conn.commit()
     conn.close()
 
@@ -54,9 +66,7 @@ def get_all_assets():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM assets")
-
     data = cursor.fetchall()
     conn.close()
     return data
@@ -71,6 +81,21 @@ def get_asset_by_id(asset_id):
     asset = cursor.fetchone()
     conn.close()
     return asset
+
+def asset_has_active_assignment(asset_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id
+        FROM assignments
+        WHERE asset_id = ?
+        AND status = 'Active'
+    """, (asset_id,))
+
+    active = cursor.fetchone() is not None
+    conn.close()
+    return active
 
 def delete_asset(asset_id):
     conn = sqlite3.connect(DB_PATH)
@@ -99,3 +124,26 @@ def update_asset(asset_id, category, brand, serial, status):
 
     conn.commit()
     conn.close()
+
+def serial_exists(serial_number, exclude_id=None):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    if exclude_id:
+        cursor.execute("""
+            SELECT id
+            FROM assets
+            WHERE serial_number = ?
+            AND id != ?
+        """, (serial_number, exclude_id))
+
+    else:
+        cursor.execute("""
+            SELECT id
+            FROM assets
+            WHERE serial_number = ?
+        """, (serial_number,))
+
+    exists = cursor.fetchone() is not None
+    conn.close()
+    return exists

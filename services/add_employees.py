@@ -32,13 +32,29 @@ def add_employee(first_name, last_name, department):
         conn.close()
 
 def import_employees_from_csv(file_path):
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     with open(file_path, newline='', encoding='utf-8') as csvfile:
+
         reader = csv.DictReader(csvfile)
+        required_columns = ["first_name","last_name","department"]
+
+        if not reader.fieldnames:
+            conn.close()
+            raise Exception("❌ CSV file is empty")
+
+        missing = [col for col in required_columns if col not in reader.fieldnames]
+        if missing:
+            conn.close()
+            raise Exception(f"❌ Missing columns: {', '.join(missing)}")
 
         for row in reader:
+            if (not row["first_name"].strip() or not row["last_name"].strip()):
+                print("❌ Skipped invalid employee row")
+                continue
+
             cursor.execute("""
                 INSERT INTO employees (
                     first_name,
@@ -46,11 +62,7 @@ def import_employees_from_csv(file_path):
                     department
                 )
                 VALUES (?, ?, ?)
-            """, (
-                row["first_name"],
-                row["last_name"],
-                row["department"]
-            ))
+            """, (row["first_name"],row["last_name"],row["department"]))
 
     conn.commit()
     conn.close()
@@ -77,6 +89,21 @@ def get_all_employees_list(sort_by="name"):
     data = cursor.fetchall()
     conn.close()
     return data
+
+def employee_has_active_assignment(employee_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT id
+        FROM assignments
+        WHERE employee_id = ?
+        AND status = 'Active'
+    """, (employee_id,))
+
+    active = cursor.fetchone() is not None
+    conn.close()
+    return active
 
 def delete_employee(employee_id):
     conn = sqlite3.connect(DB_PATH)
