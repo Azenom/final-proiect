@@ -4,6 +4,8 @@ import csv
 DB_PATH = "data/inventory.db"
 
 def add_employee(first_name, last_name, department):
+    if employee_exists(first_name, last_name):
+        return "❌ Employee already exists"
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
@@ -19,53 +21,61 @@ def add_employee(first_name, last_name, department):
         """, (first_name, last_name, department))
 
         conn.commit()
-
         employee_id = cursor.lastrowid
-        print(f"✅ Employee added with ID: {employee_id}")
-
         return employee_id
-
     except sqlite3.Error as e:
-        print("❌ Error:", e)
-
+        return f"❌ Database error: {e}"
     finally:
         conn.close()
 
 def import_employees_from_csv(file_path):
-
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    imported = 0
+    duplicates = 0
+    invalid = 0
 
     with open(file_path, newline='', encoding='utf-8') as csvfile:
-
         reader = csv.DictReader(csvfile)
         required_columns = ["first_name","last_name","department"]
-
+        
         if not reader.fieldnames:
             conn.close()
-            raise Exception("❌ CSV file is empty")
+            return "❌ CSV file is empty"
+        reader.fieldnames = [field.strip().lower()for field in reader.fieldnames]
 
         missing = [col for col in required_columns if col not in reader.fieldnames]
         if missing:
             conn.close()
-            raise Exception(f"❌ Missing columns: {', '.join(missing)}")
+            return (
+                "❌ Invalid CSV header. "
+                "Required columns: "
+                "first_name, last_name, department")
 
         for row in reader:
+            row = {k.strip().lower(): v for k, v in row.items()}
             if (not row["first_name"].strip() or not row["last_name"].strip()):
-                print("❌ Skipped invalid employee row")
+                invalid += 1
                 continue
-
-            cursor.execute("""
-                INSERT INTO employees (
-                    first_name,
-                    last_name,
-                    department
-                )
-                VALUES (?, ?, ?)
-            """, (row["first_name"],row["last_name"],row["department"]))
-
+            try:
+                cursor.execute("""
+                    INSERT INTO employees (
+                        first_name,
+                        last_name,
+                        department
+                    )
+                    VALUES (?, ?, ?)
+                """, (row["first_name"],row["last_name"],row["department"]))
+                imported += 1
+            except sqlite3.IntegrityError:
+                duplicates += 1
     conn.commit()
     conn.close()
+
+    return {
+        "imported": imported,
+        "duplicates": duplicates,
+        "invalid": invalid}
 
 def get_all_employees_list(sort_by="name"):
     conn = sqlite3.connect(DB_PATH)
@@ -140,6 +150,8 @@ def get_employee_by_id(employee_id):
     return employee
 
 def update_employee(employee_id, first_name, last_name, department):
+    if employee_exists(first_name, last_name):
+        return "❌ Employee already exists"
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 

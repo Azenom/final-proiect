@@ -23,7 +23,11 @@ def register_employee_routes(app):
                 flash(error)
                 return redirect(url_for("add_employee_route"))
 
-            add_employee(employee.first_name,employee.last_name,employee.department)
+            db_error = add_employee(employee.first_name,employee.last_name,employee.department)
+            if db_error:
+                flash(db_error)
+                return redirect(url_for("add_employee_route"))
+
             flash("✅ Employee added successfully")
             return redirect(url_for("add_employee_route"))
 
@@ -33,8 +37,17 @@ def register_employee_routes(app):
             if file:
                 upload_path = "temp_employees.csv"
                 file.save(upload_path)
-                import_employees_from_csv(upload_path)
-                flash("✅ Employees imported successfully")
+
+                result = import_employees_from_csv(upload_path)
+                if isinstance(result, str):
+                    os.remove(upload_path)
+                    flash(result, "error")
+                    return redirect(url_for("add_employee_route"))
+                
+                flash(
+                    f"✅ Imported {result['imported']} employees | "
+                    f"⚠️ Duplicates: {result['duplicates']} | "
+                    f"❌ Invalid rows: {result['invalid']}")
                 os.remove(upload_path)
             return redirect(url_for("add_employee_route"))
 
@@ -69,9 +82,12 @@ def register_employee_routes(app):
                 flash(error)
                 return redirect(url_for("edit_employee",employee_id=employee_id))
 
-            update_employee(employee_id,employee.first_name,employee.last_name,employee.department)
-            flash("✅ Employee updated successfully")
+            db_error = update_employee(employee_id,employee.first_name,employee.last_name,employee.department)
+            if db_error:
+                flash(db_error)
+                return redirect(url_for("edit_employee", employee_id=employee_id))
 
+            flash("✅ Employee updated successfully")   
             return redirect(url_for("add_employee_route"))
 
         employee = get_employee_by_id(employee_id)

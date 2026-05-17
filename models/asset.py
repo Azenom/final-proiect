@@ -1,4 +1,3 @@
-from services.add_assets import serial_exists
 from datetime import date
 
 class Asset:
@@ -36,8 +35,6 @@ class Asset:
             return "❌ Brand is required"
         if not self.serial_number.strip():
             return "❌ Serial number is required"
-        if serial_exists(self.serial_number, self.id):
-            return "❌ Serial number already exists"
 
         allowed_statuses = ["Available","Assigned","Service"]
         if self.status not in allowed_statuses:

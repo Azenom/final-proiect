@@ -1,5 +1,3 @@
-from services.add_employees import employee_exists
-
 class Employee:
     def __init__(self, id, first_name, last_name, department):
         self.id = id
@@ -25,6 +23,4 @@ class Employee:
             return "❌ First name is required"
         if not self.last_name.strip():
             return "❌ Last name is required"
-        if employee_exists(self.first_name,self.last_name,self.id):
-            return "❌ Employee already exists"
         return None

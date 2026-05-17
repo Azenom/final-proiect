@@ -5,6 +5,8 @@ import csv
 DB_PATH = "data/inventory.db"
 
 def add_asset(category, brand, serial_number, purchase_date):
+    if serial_exists(serial_number):
+        return "❌ Serial number already exists"
     conn = sqlite3.connect(DB_PATH)
     conn.execute("PRAGMA foreign_keys = ON")
     cursor = conn.cursor()
@@ -39,16 +41,19 @@ def import_assets_from_csv(file_path):
 
         if not reader.fieldnames:
             conn.close()
-            raise Exception("❌ CSV file is empty")
-        
+            return "❌ CSV file is empty"
+
+        reader.fieldnames = [field.strip().lower() for field in reader.fieldnames]
+
         missing = [col for col in required_columns if col not in reader.fieldnames]
         if missing:
             conn.close()
-            raise Exception(
-                f"❌ Missing columns: "
-                f"{', '.join(missing)}" )
+            return (
+                "❌ Invalid CSV header. "
+                "Required columns: category, brand, serial_number, purchase_date")
 
         for row in reader:
+            row = {k.strip().lower(): v for k, v in row.items()}
             if ( not row["category"].strip() or not row["brand"].strip() or not row["serial_number"].strip() ):
                 invalid += 1
                 continue
@@ -127,6 +132,8 @@ def delete_asset(asset_id):
     conn.close()
 
 def update_asset(asset_id, category, brand, serial, status):
+    if serial_exists(serial, asset_id):
+        return "❌ Serial number already exists"
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     if status == "Service":

@@ -27,12 +27,9 @@ def assign_asset(asset_id, employee_id):
             UPDATE assets SET status = 'Assigned'
             WHERE id = ?
         """, (asset_id,))
-
         conn.commit()
-
     except Exception as e:
-        print("❌ Error:", e)
-
+        return f"❌ Database error: {e}"
     finally:
         conn.close()
 
@@ -65,11 +62,8 @@ def return_asset(assignment_id):
         """, (asset_id,))
 
         conn.commit()
-        print("✅ Asset returned!")
-
     except Exception as e:
-        print("❌ Error:", e)
-
+        return f"❌ Database error: {e}"
     finally:
         conn.close()
 

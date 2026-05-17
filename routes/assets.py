@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
-from services.add_assets import add_asset,get_all_assets,delete_asset,update_asset,get_asset_by_id
-from services.add_assets import import_assets_from_csv,asset_has_active_assignment
+from services.add_assets import add_asset, get_all_assets, delete_asset, update_asset, get_asset_by_id
+from services.add_assets import import_assets_from_csv, asset_has_active_assignment
 from models.asset import Asset
 import os
 
@@ -38,7 +38,13 @@ def register_asset_routes(app):
             if file:
                 upload_path = "temp_assets.csv"
                 file.save(upload_path)
+
                 result = import_assets_from_csv(upload_path)
+                if isinstance(result, str):
+                    os.remove(upload_path)
+                    flash(result, "error")
+                    return redirect(url_for("add_asset_route"))
+                
                 flash(
                     f"✅ Imported {result['imported']} assets | "
                     f"⚠️ Duplicates: {result['duplicates']} | "
