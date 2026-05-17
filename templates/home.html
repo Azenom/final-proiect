@@ -28,6 +28,60 @@
         Manage employees, assets and assignments from one place.
     </p>
 
+    <form method="GET" class="search-form">
+    <input
+        type="text"
+        name="search"
+        placeholder="Search employees or assets..."
+        value="{{ search }}"
+    >
+    <button type="submit">Search</button>
+    </form>
+
+    {% if search %}
+    <h2>Search Results</h2>
+    <h3>Employees</h3>
+    {% if employee_results %}
+        <table>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Department</th>
+            </tr>
+            {% for employee in employee_results %}
+            <tr>
+                <td>{{ employee["first_name"] }}</td>
+                <td>{{ employee["last_name"] }}</td>
+                <td>{{ employee["department"] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No employees found.</p>
+    {% endif %}
+    <h3>Assets</h3>
+    {% if asset_results %}
+        <table>
+            <tr>
+                <th>Category</th>
+                <th>Brand</th>
+                <th>Serial Number</th>
+                <th>Status</th>
+            </tr>
+            {% for asset in asset_results %}
+            <tr>
+                <td>{{ asset["category"] }}</td>
+                <td>{{ asset["brand"] }}</td>
+                <td>{{ asset["serial_number"] }}</td>
+                <td>{{ asset["status"] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No assets found.</p>
+    {% endif %}
+    {% endif %}
+
     <h2>Dashboard</h2>
 
     <div class="cards">

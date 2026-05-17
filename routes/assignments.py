@@ -9,12 +9,16 @@ def register_assignment_routes(app):
         if request.method == "POST":
             employee_id = request.form["employee_id"].strip()
             asset_id = request.form["asset_id"].strip()
+
             if not employee_id or not asset_id:
                 flash("❌ Please fill all required fields")
                 return redirect(url_for("assign_asset_route"))
             
-            assign_asset(asset_id, employee_id)
-            flash("✅ Asset assigned successfully")
+            result = assign_asset(asset_id, employee_id)
+            if result:
+                flash(result)
+            else:
+                flash("✅ Asset assigned successfully")
             return redirect(url_for("assign_asset_route"))
 
         employees = get_all_employees()
@@ -30,7 +34,11 @@ def register_assignment_routes(app):
     @app.route("/return/<int:assignment_id>")
     def return_asset_route(assignment_id):
         return_asset(assignment_id)
-        flash("✅ Asset returned successfully")
+        result = return_asset(assignment_id)
+        if result:
+            flash(result)
+        else:
+            flash("✅ Asset returned successfully")
         return redirect(url_for("list_assignments"))
 
     @app.route("/asset/<int:asset_id>")

@@ -126,6 +126,10 @@ button {
     transition: 0.2s;
 }
 
+.search-form button {
+    margin-top: 15px;
+}
+
 button:hover {
     background-color: #34495e;
 }

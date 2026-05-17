@@ -22,7 +22,7 @@ def add_employee(first_name, last_name, department):
 
         conn.commit()
         employee_id = cursor.lastrowid
-        return employee_id
+        return None
     except sqlite3.Error as e:
         return f"❌ Database error: {e}"
     finally:
@@ -150,7 +150,7 @@ def get_employee_by_id(employee_id):
     return employee
 
 def update_employee(employee_id, first_name, last_name, department):
-    if employee_exists(first_name, last_name):
+    if employee_exists(first_name, last_name, employee_id):
         return "❌ Employee already exists"
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -167,22 +167,39 @@ def update_employee(employee_id, first_name, last_name, department):
 def employee_exists(first_name, last_name, exclude_id=None):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-
-    if exclude_id:
+    if exclude_id is not None:
         cursor.execute("""
             SELECT id
             FROM employees
-            WHERE LOWER(first_name) = LOWER(?)
-            AND LOWER(last_name) = LOWER(?)
+            WHERE
+            (
+                (
+                    LOWER(first_name) = LOWER(?)
+                    AND LOWER(last_name) = LOWER(?)
+                )
+                OR
+                (
+                    LOWER(first_name) = LOWER(?)
+                    AND LOWER(last_name) = LOWER(?)
+                )
+            )
             AND id != ?
-            """, (first_name,last_name,exclude_id))
+        """, (first_name,last_name,last_name,first_name,exclude_id))
     else:
         cursor.execute("""
             SELECT id
             FROM employees
-            WHERE LOWER(first_name) = LOWER(?)
-            AND LOWER(last_name) = LOWER(?)
-        """, (first_name,last_name))
+            WHERE
+            (
+                LOWER(first_name) = LOWER(?)
+                AND LOWER(last_name) = LOWER(?)
+            )
+            OR
+            (
+                LOWER(first_name) = LOWER(?)
+                AND LOWER(last_name) = LOWER(?)
+            )
+        """, (first_name,last_name,last_name,first_name))
 
     exists = cursor.fetchone() is not None
     conn.close()
