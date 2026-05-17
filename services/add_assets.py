@@ -62,11 +62,23 @@ def import_assets_from_csv(file_path):
     conn.commit()
     conn.close()
 
-def get_all_assets():
+def get_all_assets(sort_by="status"):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM assets")
+    
+    allowed_sorts = {
+    "status": "status",
+    "category": "category",
+    "brand": "brand"
+    }
+    sort_column = allowed_sorts.get(sort_by, "status")
+    query = f"""
+        SELECT *
+        FROM assets
+        ORDER BY {sort_column}"""
+    cursor.execute(query)
+
     data = cursor.fetchall()
     conn.close()
     return data

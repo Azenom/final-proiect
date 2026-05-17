@@ -1,6 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
-from services.add_employees import add_employee,import_employees_from_csv,get_all_employees_list
-from services.add_employees import delete_employee,get_employee_by_id,update_employee,employee_has_active_assignment
+from services.add_employees import add_employee,import_employees_from_csv,get_all_employees_list,delete_employee
+from services.add_employees import get_employee_by_id,update_employee,employee_has_active_assignment
+from models.employee import Employee
 import os
 
 def register_employee_routes(app):
@@ -13,10 +14,16 @@ def register_employee_routes(app):
             first_name = request.form["first_name"].strip()
             last_name = request.form["last_name"].strip()
             department = request.form["department"].strip()
-            if not first_name or not last_name:
-                flash("❌ Please fill all required fields")
+
+            employee = Employee(None,first_name,last_name,department)
+            employee.normalize()
+
+            error = employee.validate()
+            if error:
+                flash(error)
                 return redirect(url_for("add_employee_route"))
-            add_employee(first_name, last_name, department)
+
+            add_employee(employee.first_name,employee.last_name,employee.department)
             flash("✅ Employee added successfully")
             return redirect(url_for("add_employee_route"))
 
@@ -30,34 +37,42 @@ def register_employee_routes(app):
                 flash("✅ Employees imported successfully")
                 os.remove(upload_path)
             return redirect(url_for("add_employee_route"))
-        
+
         sort_by = request.args.get("sort", "name")
         employees = get_all_employees_list(sort_by)
-        return render_template ("employees/add.html", employees = employees)
+        return render_template("employees/add.html",employees=employees)
 
     @app.route("/employees/delete/<int:employee_id>")
     def delete_employee_route(employee_id):
         if employee_has_active_assignment(employee_id):
-            flash("❌ Cannot delete employee with active assignments")
+            flash(
+                "❌ Cannot delete employee "
+                "with active assignments")
             return redirect(url_for("add_employee_route"))
+        
         delete_employee(employee_id)
         flash("✅ Employee deleted")
         return redirect(url_for("add_employee_route"))
-    
-    @app.route("/employees/edit/<int:employee_id>", methods=["GET", "POST"])
+
+    @app.route("/employees/edit/<int:employee_id>",methods=["GET", "POST"])
     def edit_employee(employee_id):
         if request.method == "POST":
             first_name = request.form["first_name"].strip()
             last_name = request.form["last_name"].strip()
             department = request.form["department"].strip()
-            if not first_name or not last_name:
-                flash("❌ Please fill all required fields")
-                return redirect(url_for("edit_employee", employee_id=employee_id))
-            update_employee(employee_id,first_name,last_name,department)
+
+            employee = Employee(employee_id,first_name,last_name,department)
+            employee.normalize()
+
+            error = employee.validate()
+            if error:
+                flash(error)
+                return redirect(url_for("edit_employee",employee_id=employee_id))
+
+            update_employee(employee_id,employee.first_name,employee.last_name,employee.department)
             flash("✅ Employee updated successfully")
+
             return redirect(url_for("add_employee_route"))
-        
+
         employee = get_employee_by_id(employee_id)
         return render_template("employees/edit.html",employee=employee)
-    
-    

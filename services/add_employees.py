@@ -147,12 +147,31 @@ def update_employee(employee_id, first_name, last_name, department):
         UPDATE employees
         SET first_name = ?, last_name = ?, department = ?
         WHERE id = ?
-    """, (
-        first_name,
-        last_name,
-        department,
-        employee_id
-    ))
+    """, (first_name,last_name,department,employee_id))
     
     conn.commit()
     conn.close()
+
+def employee_exists(first_name, last_name, exclude_id=None):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    if exclude_id:
+        cursor.execute("""
+            SELECT id
+            FROM employees
+            WHERE LOWER(first_name) = LOWER(?)
+            AND LOWER(last_name) = LOWER(?)
+            AND id != ?
+            """, (first_name,last_name,exclude_id))
+    else:
+        cursor.execute("""
+            SELECT id
+            FROM employees
+            WHERE LOWER(first_name) = LOWER(?)
+            AND LOWER(last_name) = LOWER(?)
+        """, (first_name,last_name))
+
+    exists = cursor.fetchone() is not None
+    conn.close()
+    return exists

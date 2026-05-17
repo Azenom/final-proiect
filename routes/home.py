@@ -24,11 +24,4 @@ def register_home_routes(app):
         assigned = cursor.fetchone()[0]
 
         conn.close()
-
-        return render_template(
-            "home.html",
-            employees=employees,
-            assets=assets,
-            available=available,
-            assigned=assigned
-        )
+        return render_template("home.html",employees=employees,assets=assets,available=available,assigned=assigned)

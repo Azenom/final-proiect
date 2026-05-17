@@ -8,6 +8,7 @@ def register_asset_routes(app):
 
     @app.route("/assets/add", methods=["GET", "POST"])
     def add_asset_route():
+
         # Manual add
         if request.method == "POST" and "add_asset" in request.form:
             category = request.form["category"].strip()
@@ -16,12 +17,14 @@ def register_asset_routes(app):
             purchase_date = request.form["purchase_date"].strip()
 
             asset = Asset(None,category,brand,serial_number,"Available",purchase_date)
+            asset.normalize()
+
             error = asset.validate()
             if error:
                 flash(error)
                 return redirect(url_for("add_asset_route"))
 
-            add_asset(category,brand,serial_number,purchase_date)
+            add_asset(asset.category,asset.brand,asset.serial_number,purchase_date)
             flash("✅ Asset added successfully")
             return redirect(url_for("add_asset_route"))
 
@@ -35,7 +38,9 @@ def register_asset_routes(app):
                 flash("✅ Assets imported successfully")
                 os.remove(upload_path)
             return redirect(url_for("add_asset_route"))
-        assets = get_all_assets()
+        
+        sort_by = request.args.get("sort", "status")
+        assets = get_all_assets(sort_by)
         return render_template("assets/add.html",assets=assets)
 
     @app.route("/assets/delete/<int:asset_id>")
@@ -43,6 +48,7 @@ def register_asset_routes(app):
         if asset_has_active_assignment(asset_id):
             flash("❌ Cannot delete assigned asset")
             return redirect(url_for("add_asset_route"))
+
         delete_asset(asset_id)
         flash("✅ Asset deleted")
         return redirect(url_for("add_asset_route"))
@@ -54,16 +60,18 @@ def register_asset_routes(app):
             brand = request.form["brand"].strip()
             serial = request.form["serial_number"].strip()
             status = request.form["status"].strip()
-            
+
             asset = Asset(asset_id,category,brand,serial,status)
+            asset.normalize()
+
             error = asset.validate()
             if error:
                 flash(error)
                 return redirect(url_for("edit_asset",asset_id=asset_id))
 
-            update_asset(asset_id,category,brand,serial,status)
+            update_asset(asset_id,asset.category,asset.brand,asset.serial_number,status)
             flash("✅ Asset updated successfully")
             return redirect(url_for("add_asset_route"))
-        
+
         asset = get_asset_by_id(asset_id)
         return render_template("assets/edit.html",asset=asset)

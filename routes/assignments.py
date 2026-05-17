@@ -1,13 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
-from services.assignments import (
-    assign_asset,
-    return_asset,
-    get_all_employees,
-    get_available_assets,
-    get_active_assignments,
-    get_asset_history,
-    get_asset_details
-)
+from services.assignments import assign_asset,return_asset,get_all_employees,get_available_assets
+from services.assignments import get_active_assignments,get_asset_history,get_asset_details
 
 def register_assignment_routes(app):
 
@@ -19,6 +12,7 @@ def register_assignment_routes(app):
             if not employee_id or not asset_id:
                 flash("❌ Please fill all required fields")
                 return redirect(url_for("assign_asset_route"))
+            
             assign_asset(asset_id, employee_id)
             flash("✅ Asset assigned successfully")
             return redirect(url_for("assign_asset_route"))
