@@ -24,7 +24,11 @@ def register_asset_routes(app):
                 flash(error)
                 return redirect(url_for("add_asset_route"))
 
-            add_asset(asset.category,asset.brand,asset.serial_number,purchase_date)
+            db_error = add_asset(asset.category,asset.brand,asset.serial_number,purchase_date)
+            if db_error:
+                flash(db_error)
+                return redirect(url_for("add_asset_route"))
+
             flash("✅ Asset added successfully")
             return redirect(url_for("add_asset_route"))
 
@@ -34,8 +38,11 @@ def register_asset_routes(app):
             if file:
                 upload_path = "temp_assets.csv"
                 file.save(upload_path)
-                import_assets_from_csv(upload_path)
-                flash("✅ Assets imported successfully")
+                result = import_assets_from_csv(upload_path)
+                flash(
+                    f"✅ Imported {result['imported']} assets | "
+                    f"⚠️ Duplicates: {result['duplicates']} | "
+                    f"❌ Invalid rows: {result['invalid']}")
                 os.remove(upload_path)
             return redirect(url_for("add_asset_route"))
         

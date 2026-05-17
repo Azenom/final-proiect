@@ -1,3 +1,4 @@
+from models.asset import Asset
 import sqlite3
 import csv
 
@@ -16,36 +17,45 @@ def add_asset(category, brand, serial_number, purchase_date):
                 purchase_date
             )
             VALUES (?, ?, ?, ?)
-        """, (category, brand, serial_number, purchase_date))
+        """, (category,brand,serial_number,purchase_date))
         conn.commit()
-        print("✅ Asset added successfully!")
-    except sqlite3.IntegrityError as e:
-        print("❌ Error:", e)
-    finally:
-        conn.close()
+        return None
+
+    except sqlite3.IntegrityError:
+        return "❌ Serial number already exists"
 
 def import_assets_from_csv(file_path):
+
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    with open(file_path, newline='', encoding='utf-8') as csvfile:
+    imported = 0
+    duplicates = 0
+    invalid = 0
+
+    with open(file_path,newline='',encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         required_columns = ["category","brand","serial_number","purchase_date"]
 
         if not reader.fieldnames:
             conn.close()
             raise Exception("❌ CSV file is empty")
-
+        
         missing = [col for col in required_columns if col not in reader.fieldnames]
         if missing:
             conn.close()
-            raise Exception(f"❌ Missing columns: {', '.join(missing)}")
+            raise Exception(
+                f"❌ Missing columns: "
+                f"{', '.join(missing)}" )
 
         for row in reader:
-            if (not row["category"].strip() or not row["brand"].strip() or not row["serial_number"].strip()):
-                print("❌ Skipped invalid asset row")
+            if ( not row["category"].strip() or not row["brand"].strip() or not row["serial_number"].strip() ):
+                invalid += 1
                 continue
             try:
+                asset = Asset(None,row["category"],row["brand"],row["serial_number"],"Available",row["purchase_date"])
+                asset.normalize()
+
                 cursor.execute("""
                     INSERT INTO assets (
                         category,
@@ -54,24 +64,21 @@ def import_assets_from_csv(file_path):
                         purchase_date
                     )
                     VALUES (?, ?, ?, ?)
-                """, (row["category"],row["brand"],row["serial_number"],row["purchase_date"]))
-
+                """, (asset.category,asset.brand,asset.serial_number,row["purchase_date"]))
+                imported += 1
             except sqlite3.IntegrityError:
-                print(f"Skipped duplicate: "f"{row['serial_number']}")
+                duplicates += 1
 
     conn.commit()
     conn.close()
+    return {"imported": imported,"duplicates": duplicates,"invalid": invalid}
 
 def get_all_assets(sort_by="status"):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    allowed_sorts = {
-    "status": "status",
-    "category": "category",
-    "brand": "brand"
-    }
+    allowed_sorts = {"status": "status","category": "category","brand": "brand"}
     sort_column = allowed_sorts.get(sort_by, "status")
     query = f"""
         SELECT *
@@ -87,9 +94,11 @@ def get_asset_by_id(asset_id):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
+
     cursor.execute("""
         SELECT * FROM assets WHERE id = ?
     """, (asset_id,))
+    
     asset = cursor.fetchone()
     conn.close()
     return asset
