@@ -41,7 +41,10 @@ class Asset:
             return "❌ Invalid asset status"
         
         if self.purchase_date:
-            purchase = date.fromisoformat(self.purchase_date)
+            try:
+                purchase = date.fromisoformat(self.purchase_date)
+            except ValueError:
+                return "❌ Invalid purchase date format"
             if purchase > date.today():
                 return "❌ Purchase date cannot be in the future"
 

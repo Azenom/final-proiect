@@ -14,7 +14,8 @@ def assign_asset(asset_id, employee_id):
         cursor.execute("SELECT status FROM assets WHERE id = ?", (asset_id,))
         asset = cursor.fetchone()
         if not asset or asset[0] != "Available":
-            raise Exception("Asset not available")
+            conn.close()
+            return "❌ Asset not available"
 
         # insert assignment
         cursor.execute("""
@@ -28,7 +29,7 @@ def assign_asset(asset_id, employee_id):
             WHERE id = ?
         """, (asset_id,))
         conn.commit()
-    except Exception as e:
+    except sqlite3.Error as e:
         return f"❌ Database error: {e}"
     finally:
         conn.close()
@@ -44,8 +45,8 @@ def return_asset(assignment_id):
         row = cursor.fetchone()
 
         if not row:
-            raise Exception("Assignment not found")
-
+            conn.close()
+            return "❌ Assignment not found"
         asset_id = row[0]
 
         # Update assignment
@@ -62,7 +63,7 @@ def return_asset(assignment_id):
         """, (asset_id,))
 
         conn.commit()
-    except Exception as e:
+    except sqlite3.Error as e:
         return f"❌ Database error: {e}"
     finally:
         conn.close()
