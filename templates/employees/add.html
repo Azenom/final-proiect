@@ -1,156 +1,278 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Employees</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
 <div class="container">
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
         {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message flash-{{ category }}">
+
                     {{ message }}
+
                 </div>
+
             {% endfor %}
+
         {% endif %}
+
     {% endwith %}
 
     <div class="page-header">
 
         <h1>Employees</h1>
 
-        <a href="/" class="btn">
-            Back to Home
-        </a>
+        <div class="header-buttons">
+
+            <a href="{{ url_for('home') }}"
+               class="btn">
+
+                Back to Home
+
+            </a>
+
+        </div>
 
     </div>
 
-    <h2>Add Employee</h2>
+    <section class="content-section">
 
-    <form method="POST">
+        <h2>Add Employee</h2>
 
-        <label>First Name:</label>
+        <form method="POST">
 
-        <input type="text"
-               name="first_name"
-               required>
+            <div class="form-group">
 
-        <br><br>
+                <label for="first_name">
+                    First Name
+                </label>
 
-        <label>Last Name:</label>
+                <input type="text"
+                       id="first_name"
+                       name="first_name"
+                       required>
 
-        <input type="text"
-               name="last_name"
-               required>
+            </div>
 
-        <br><br>
+            <div class="form-group">
 
-        <label>Department:</label>
+                <label for="last_name">
+                    Last Name
+                </label>
 
-        <input type="text"
-               name="department">
+                <input type="text"
+                       id="last_name"
+                       name="last_name"
+                       required>
 
-        <br><br>
+            </div>
 
-        <button type="submit"
-                name="add_employee">
-            Add Employee
-        </button>
+            <div class="form-group">
 
-    </form>
+                <label for="department">
+                    Department
+                </label>
 
-    <hr>
+                <input type="text"
+                       id="department"
+                       name="department">
 
-    <h2>Import Employees from CSV</h2>
+            </div>
 
-    <p>
-        Format:
-        first_name,last_name,department
-    </p>
+            <button type="submit"
+                    name="add_employee">
 
-    <form method="POST"
-          enctype="multipart/form-data">
+                Add Employee
 
-        <input type="file"
-               name="csv_file"
-               accept=".csv"
-               required>
+            </button>
 
-        <br><br>
+        </form>
 
-        <button type="submit"
-                name="import_csv">
-            Import CSV
-        </button>
+    </section>
 
-    </form>
+    <section class="content-section">
 
-    <hr>
+        <h2>Import Employees from CSV</h2>
 
-    <h2>All Employees</h2>
+        <p>
+            Format:
+            first_name, last_name, department
+        </p>
 
-    <p>
-        <a href="/employees/add?sort=name">Sort by Name</a>
-        |
-        <a href="/employees/add?sort=department">Sort by Department</a>
-    </p>
+        <form method="POST"
+              enctype="multipart/form-data">
 
-    <table>
+            <div class="form-group">
 
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Actions</th>
-        </tr>
+                <label for="csv_file">
+                    CSV File
+                </label>
 
-        {% for employee in employees %}
+                <input type="file"
+                       id="csv_file"
+                       name="csv_file"
+                       accept=".csv"
+                       required>
 
-        <tr>
+            </div>
 
-            <td>
-                {{ employee["id"] }}
-            </td>
+            <button type="submit"
+                    name="import_csv">
 
-            <td>
+                Import CSV
 
-                {{ employee["first_name"] }}
-                {{ employee["last_name"] }}
+            </button>
 
-            </td>
+        </form>
 
-            <td>
-                {{ employee["department"] }}
-            </td>
+    </section>
 
-            <td>
+    <section class="content-section">
 
-                <a href="/employees/edit/{{ employee['id'] }}">
-                    Edit
+        <div class="page-header">
+
+            <h2>All Employees</h2>
+
+            <div class="header-buttons">
+
+                <a href="{{ url_for('add_employee_route', sort='name') }}"
+                   class="btn btn-small">
+
+                    Sort by Name
+
                 </a>
 
-                |
+                <a href="{{ url_for('add_employee_route', sort='department') }}"
+                   class="btn btn-small">
 
-                <a href="/employees/delete/{{ employee['id'] }}">
-                    Delete
+                    Sort by Department
+
                 </a>
 
-            </td>
+            </div>
 
-        </tr>
+        </div>
 
-        {% endfor %}
+        <p>
 
-    </table>
+            Total employees:
+            <strong>{{ employees|length }}</strong>
+
+        </p>
+
+        {% if employees %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Name</th>
+
+                            <th>Department</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for employee in employees %}
+
+                        <tr>
+
+                            <td>
+
+                                {{ employee["id"] }}
+
+                            </td>
+
+                            <td>
+
+                                {{ employee["first_name"] }}
+                                {{ employee["last_name"] }}
+
+                            </td>
+
+                            <td>
+
+                                {{ employee["department"] or "-" }}
+
+                            </td>
+
+                            <td>
+
+                                <div class="action-links">
+
+                                    <a href="{{ url_for('edit_employee', employee_id=employee['id']) }}"
+                                       class="btn btn-small">
+
+                                        Edit
+
+                                    </a>
+
+                                    <a href="{{ url_for('delete_employee_route', employee_id=employee['id']) }}"
+                                       class="btn btn-small"
+                                       onclick="return confirm('Delete this employee?')">
+
+                                        Delete
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p>
+
+                No employees found.
+
+            </p>
+
+        {% endif %}
+
+    </section>
 
 </div>
 
 </body>
+
 </html>

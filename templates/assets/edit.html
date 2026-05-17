@@ -1,100 +1,154 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Edit Asset</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
 <div class="container">
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
         {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message flash-{{ category }}">
+
                     {{ message }}
+
                 </div>
+
             {% endfor %}
+
         {% endif %}
+
     {% endwith %}
 
     <div class="page-header">
 
         <h1>Edit Asset</h1>
 
-        <a href="/assets/add" class="btn">
-            Back to Assets
-        </a>
+        <div class="header-buttons">
+
+            <a href="{{ url_for('add_asset_route') }}"
+               class="btn">
+
+                Back to Assets
+
+            </a>
+
+        </div>
 
     </div>
 
-    <form method="POST">
+    <section class="content-section">
 
-        <label>Category:</label>
+        <form method="POST">
 
-        <input
-            name="category"
-            value="{{ asset['category'] }}"
-            required
-        >
+            <div class="form-group">
 
-        <br><br>
+                <label for="category">
+                    Category
+                </label>
 
-        <label>Brand:</label>
+                <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    value="{{ asset['category'] }}"
+                    required
+                >
 
-        <input
-            name="brand"
-            value="{{ asset['brand'] }}"
-            required
-        >
+            </div>
 
-        <br><br>
+            <div class="form-group">
 
-        <label>Serial Number:</label>
+                <label for="brand">
+                    Brand
+                </label>
 
-        <input
-            name="serial_number"
-            value="{{ asset['serial_number'] }}"
-            required
-        >
+                <input
+                    type="text"
+                    id="brand"
+                    name="brand"
+                    value="{{ asset['brand'] }}"
+                    required
+                >
 
-        <br><br>
+            </div>
 
-        <label>Status:</label>
+            <div class="form-group">
 
-        <select name="status">
+                <label for="serial_number">
+                    Serial Number
+                </label>
 
-            <option value="Available"
-                {% if asset["status"] == "Available" %}
-                    selected
-                {% endif %}
-            >
-                Available
-            </option>
+                <input
+                    type="text"
+                    id="serial_number"
+                    name="serial_number"
+                    value="{{ asset['serial_number'] }}"
+                    required
+                >
 
-            <option value="Service"
-                {% if asset["status"] == "Service" %}
-                    selected
-                {% endif %}
-            >
-                Service
-            </option>
+            </div>
 
-        </select>
+            <div class="form-group">
 
-        <br><br>
+                <label for="status">
+                    Status
+                </label>
 
-        <button type="submit">
-            Save Changes
-        </button>
+                <select
+                    id="status"
+                    name="status"
+                >
 
-    </form>
+                    <option value="Available"
+                        {% if asset["status"] == "Available" %}
+                            selected
+                        {% endif %}
+                    >
+                        Available
+                    </option>
+
+                    <option value="Service"
+                        {% if asset["status"] == "Service" %}
+                            selected
+                        {% endif %}
+                    >
+                        Service
+                    </option>
+
+                </select>
+
+            </div>
+
+            <button type="submit">
+
+                Save Changes
+
+            </button>
+
+        </form>
+
+    </section>
 
 </div>
 
 </body>
+
 </html>

@@ -1,133 +1,226 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Assignments</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
 <div class="container">
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
         {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message flash-{{ category }}">
+
                     {{ message }}
+
                 </div>
+
             {% endfor %}
+
         {% endif %}
+
     {% endwith %}
 
     <div class="page-header">
 
         <h1>Active Assignments</h1>
 
-        <a href="/" class="btn">
-            Back to Home
-        </a>
+        <div class="header-buttons">
+
+            <a href="{{ url_for('home') }}"
+               class="btn">
+
+                Back to Home
+
+            </a>
+
+        </div>
 
     </div>
 
-    <h2>Sort By</h2>
+    <section class="content-section">
 
-    <p>
+        <div class="page-header">
 
-        <a href="/assignments?sort=date">
-            Date
-        </a>
+            <h2>Sort Assignments</h2>
 
-        |
+            <div class="header-buttons">
 
-        <a href="/assignments?sort=name">
-            Employee
-        </a>
+                <a href="{{ url_for('list_assignments', sort='date') }}"
+                   class="btn btn-small">
 
-        |
+                    Date
 
-        <a href="/assignments?sort=category">
-            Category
-        </a>
-
-    </p>
-
-    <table>
-
-        <tr>
-            <th>ID</th>
-            <th>Asset</th>
-            <th>Employee</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-
-        {% for row in assignments %}
-
-        <tr>
-
-            <td>
-                {{ row["assignment_id"] }}
-            </td>
-
-            <td>
-
-                <b>
-                    {{ row["category"] }}
-                </b>
-
-                <br>
-
-                {{ row["brand"] }}
-
-                <br>
-
-                <small>
-                    SN:
-                    {{ row["serial_number"] }}
-                </small>
-
-            </td>
-
-            <td>
-
-                {{ row["first_name"] }}
-                {{ row["last_name"] }}
-
-            </td>
-
-            <td>
-                {{ row["assigned_date"] }}
-            </td>
-
-            <td>
-                {{ row["status"] }}
-            </td>
-
-            <td>
-
-                <a href="/return/{{ row['assignment_id'] }}">
-                    Return
                 </a>
 
-                <br><br>
+                <a href="{{ url_for('list_assignments', sort='name') }}"
+                   class="btn btn-small">
 
-                <a href="/asset/{{ row['asset_id'] }}">
-                    View History
+                    Employee
+
                 </a>
 
-            </td>
+                <a href="{{ url_for('list_assignments', sort='category') }}"
+                   class="btn btn-small">
 
-        </tr>
+                    Category
 
-        {% endfor %}
+                </a>
 
-    </table>
+            </div>
+
+        </div>
+
+        <p>
+
+            Total active assignments:
+            <strong>{{ assignments|length }}</strong>
+
+        </p>
+
+        {% if assignments %}
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Asset</th>
+
+                            <th>Employee</th>
+
+                            <th>Date</th>
+
+                            <th>Status</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in assignments %}
+
+                        <tr>
+
+                            <td>
+
+                                {{ row["assignment_id"] }}
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ row["category"] }}
+
+                                </strong>
+
+                                <br>
+
+                                {{ row["brand"] }}
+
+                                <br>
+
+                                <small>
+
+                                    SN:
+                                    {{ row["serial_number"] }}
+
+                                </small>
+
+                            </td>
+
+                            <td>
+
+                                {{ row["first_name"] }}
+                                {{ row["last_name"] }}
+
+                            </td>
+
+                            <td>
+
+                                {{ row["assigned_date"] }}
+
+                            </td>
+
+                            <td>
+
+                                {{ row["status"] }}
+
+                            </td>
+
+                            <td>
+
+                                <div class="action-links">
+
+                                    <a href="{{ url_for('return_asset_route', assignment_id=row['assignment_id']) }}"
+                                       class="btn btn-small"
+                                       onclick="return confirm('Return this asset?')">
+
+                                        Return
+
+                                    </a>
+
+                                    <a href="{{ url_for('asset_history', asset_id=row['asset_id']) }}"
+                                       class="btn btn-small">
+
+                                        View History
+
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <p>
+
+                No active assignments found.
+
+            </p>
+
+        {% endif %}
+
+    </section>
 
 </div>
 
 </body>
+
 </html>

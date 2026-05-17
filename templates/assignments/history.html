@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Asset History</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
@@ -18,74 +25,149 @@
 
         <div class="header-buttons">
 
-            <a href="/assignments" class="btn">
+            <a href="{{ url_for('list_assignments') }}"
+               class="btn">
+
                 Assignments
+
             </a>
 
-            <a href="/" class="btn">
+            <a href="{{ url_for('home') }}"
+               class="btn">
+
                 Home
+
             </a>
 
         </div>
 
     </div>
 
-    <div class="asset-info">
+    {% if asset %}
 
-        <h2>{{ asset.full_name() }}</h2>
+        <section class="asset-info">
 
-        <p>
+            <h2>
 
-            <b>Serial:</b>
-            {{ asset.serial() }}
+                {{ asset.full_name() }}
 
-            <br><br>
+            </h2>
 
-            <b>Status:</b>
-            {{ asset.status }}
+            <p>
 
-        </p>
+                <strong>Serial:</strong>
 
-    </div>
+                {{ asset.serial() }}
 
-    <br>
+            </p>
 
-    <table>
+            <p>
 
-        <tr>
-            <th>Employee</th>
-            <th>Assigned</th>
-            <th>Returned</th>
-            <th>Status</th>
-        </tr>
+                <strong>Status:</strong>
 
-        {% for row in history %}
+                {{ asset.status }}
 
-        <tr>
+            </p>
 
-            <td>
-                {{ row["employee"].full_name() }}
-            </td>
+        </section>
 
-            <td>
-                {{ row["assigned_date"] }}
-            </td>
+        <section class="content-section">
 
-            <td>
-                {{ row["returned_date"] or "-" }}
-            </td>
+            <h2>Assignment History</h2>
 
-            <td>
-                {{ row["status"] }}
-            </td>
+            <p>
 
-        </tr>
+                Total records:
+                <strong>{{ history|length }}</strong>
 
-        {% endfor %}
+            </p>
 
-    </table>
+            {% if history %}
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Employee</th>
+
+                                <th>Assigned</th>
+
+                                <th>Returned</th>
+
+                                <th>Status</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for row in history %}
+
+                            <tr>
+
+                                <td>
+
+                                    {{ row["employee"].full_name() }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ row["assigned_date"] }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ row["returned_date"] or "-" }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ row["status"] }}
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <p>
+
+                    No assignment history found.
+
+                </p>
+
+            {% endif %}
+
+        </section>
+
+    {% else %}
+
+        <div class="flash-message flash-error">
+
+            Asset not found.
+
+        </div>
+
+    {% endif %}
 
 </div>
 
 </body>
+
 </html>

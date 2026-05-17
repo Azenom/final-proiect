@@ -1,87 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Assign Device</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 
 <body>
 
 <div class="container">
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
         {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">
+
+            {% for category, message in messages %}
+
+                <div class="flash-message flash-{{ category }}">
+
                     {{ message }}
+
                 </div>
+
             {% endfor %}
+
         {% endif %}
+
     {% endwith %}
 
     <div class="page-header">
 
         <h1>Assign Device</h1>
 
-        <a href="/" class="btn">
-            Back to Home
-        </a>
+        <div class="header-buttons">
+
+            <a href="{{ url_for('home') }}"
+               class="btn">
+
+                Back to Home
+
+            </a>
+
+        </div>
 
     </div>
 
-    <form method="POST">
+    <section class="content-section">
 
-        <label>Employee:</label>
+        <form method="POST">
 
-        <select name="employee_id" required>
+            <div class="form-group">
 
-            {% for emp in employees %}
+                <label for="employee_id">
+                    Employee
+                </label>
 
-                <option value="{{ emp['id'] }}">
+                <select
+                    id="employee_id"
+                    name="employee_id"
+                    required
+                >
 
-                    {{ emp['first_name'] }}
-                    {{ emp['last_name'] }}
+                    {% if employees %}
 
-                </option>
+                        {% for emp in employees %}
 
-            {% endfor %}
+                            <option value="{{ emp['id'] }}">
 
-        </select>
+                                {{ emp['first_name'] }}
+                                {{ emp['last_name'] }}
 
-        <br><br>
+                            </option>
 
-        <label>Select Available Device:</label>
+                        {% endfor %}
 
-        <select name="asset_id" required>
+                    {% else %}
 
-            {% for asset in assets %}
+                        <option disabled selected>
+                            No employees available
+                        </option>
 
-                <option value="{{ asset['id'] }}">
+                    {% endif %}
 
-                    {{ asset['category'] }}
-                    -
-                    {{ asset['brand'] }}
+                </select>
 
-                    (SN: {{ asset['serial_number'] }})
+            </div>
 
-                </option>
+            <div class="form-group">
 
-            {% endfor %}
+                <label for="asset_id">
+                    Select Available Device
+                </label>
 
-        </select>
+                <select
+                    id="asset_id"
+                    name="asset_id"
+                    required
+                >
 
-        <br><br>
+                    {% if assets %}
 
-        <button type="submit">
-            Assign
-        </button>
+                        {% for asset in assets %}
 
-    </form>
+                            <option value="{{ asset['id'] }}">
+
+                                {{ asset['category'] }}
+                                -
+                                {{ asset['brand'] }}
+
+                                (SN:
+                                {{ asset['serial_number'] }})
+
+                            </option>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                        <option disabled selected>
+                            No available assets
+                        </option>
+
+                    {% endif %}
+
+                </select>
+
+            </div>
+
+            <button type="submit">
+
+                Assign
+
+            </button>
+
+        </form>
+
+    </section>
 
 </div>
 
 </body>
+
 </html>
