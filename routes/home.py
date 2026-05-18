@@ -9,7 +9,6 @@ import sqlite3
 
 DB_PATH = "data/inventory.db"
 
-
 def register_home_routes(app):
 
     @app.route("/")
