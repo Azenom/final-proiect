@@ -4,7 +4,6 @@ from models.employee import Employee
 
 DB_PATH = "data/inventory.db"
 
-
 def add_employee(first_name, last_name, department):
 
     if employee_exists(first_name, last_name):
@@ -136,7 +135,6 @@ def import_employees_from_csv(file_path):
         "invalid": invalid
     }
 
-
 def get_all_employees_list(sort_by="name"):
 
     allowed_sort = {
@@ -162,7 +160,6 @@ def get_all_employees_list(sort_by="name"):
 
         return cursor.fetchall()
 
-
 def employee_has_active_assignment(employee_id):
 
     with sqlite3.connect(DB_PATH) as conn:
@@ -177,7 +174,6 @@ def employee_has_active_assignment(employee_id):
         """, (employee_id,))
 
         return cursor.fetchone() is not None
-
 
 def delete_employee(employee_id):
 
@@ -197,7 +193,6 @@ def delete_employee(employee_id):
             WHERE id = ?
         """, (employee_id,))
 
-
 def get_employee_by_id(employee_id):
 
     with sqlite3.connect(DB_PATH) as conn:
@@ -213,7 +208,6 @@ def get_employee_by_id(employee_id):
         """, (employee_id,))
 
         return cursor.fetchone()
-
 
 def update_employee(employee_id, first_name, last_name, department):
 
@@ -240,7 +234,6 @@ def update_employee(employee_id, first_name, last_name, department):
         ))
 
     return None
-
 
 def employee_exists(first_name, last_name, exclude_id=None):
 

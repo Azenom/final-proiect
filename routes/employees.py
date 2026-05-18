@@ -20,7 +20,6 @@ from models.employee import Employee
 
 import os
 
-
 def register_employee_routes(app):
 
     @app.route("/employees/add", methods=["GET", "POST"])
@@ -213,3 +212,4 @@ def register_employee_routes(app):
             "employees/edit.html",
             employee=employee
         )
+    
