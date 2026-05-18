@@ -33,7 +33,6 @@ def add_employee(first_name, last_name, department):
     except sqlite3.Error as e:
         return f"❌ Database error: {e}"
 
-
 def import_employees_from_csv(file_path):
 
     imported = 0
@@ -42,11 +41,13 @@ def import_employees_from_csv(file_path):
 
     with sqlite3.connect(DB_PATH) as conn:
 
-        conn.execute("PRAGMA foreign_keys = ON")
-
         cursor = conn.cursor()
 
-        with open(file_path, newline='', encoding='utf-8') as csvfile:
+        with open(
+            file_path,
+            newline='',
+            encoding='utf-8'
+        ) as csvfile:
 
             reader = csv.DictReader(csvfile)
 
@@ -91,40 +92,43 @@ def import_employees_from_csv(file_path):
                     invalid += 1
                     continue
 
-                try:
+                employee = Employee(
+                    None,
+                    row["first_name"],
+                    row["last_name"],
+                    row["department"]
+                )
 
-                    employee = Employee(
-                        None,
-                        row["first_name"],
-                        row["last_name"],
-                        row["department"]
-                    )
+                employee.normalize()
 
-                    employee.normalize()
+                error = employee.validate()
 
-                    error = employee.validate()
+                if error:
+                    invalid += 1
+                    continue
 
-                    if error:
-                        invalid += 1
-                        continue
-
-                    cursor.execute("""
-                        INSERT INTO employees (
-                            first_name,
-                            last_name,
-                            department
-                        )
-                        VALUES (?, ?, ?)
-                    """, (
-                        employee.first_name,
-                        employee.last_name,
-                        employee.department
-                    ))
-
-                    imported += 1
-
-                except sqlite3.IntegrityError:
+                # Duplicate check
+                if employee_exists(
+                    employee.first_name,
+                    employee.last_name
+                ):
                     duplicates += 1
+                    continue
+
+                cursor.execute("""
+                    INSERT INTO employees (
+                        first_name,
+                        last_name,
+                        department
+                    )
+                    VALUES (?, ?, ?)
+                """, (
+                    employee.first_name,
+                    employee.last_name,
+                    employee.department
+                ))
+
+                imported += 1
 
     return {
         "imported": imported,
