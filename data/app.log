@@ -163,3 +163,42 @@
 2026-05-18 18:20:58,594 | INFO | 127.0.0.1 - - [18/May/2026 18:20:58] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
 2026-05-18 18:21:01,552 | INFO | 127.0.0.1 - - [18/May/2026 18:21:01] "GET /employees/add?sort=department HTTP/1.1" 200 -
 2026-05-18 18:21:01,820 | INFO | 127.0.0.1 - - [18/May/2026 18:21:01] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:11,799 | INFO | Starting Inventory Management System
+2026-05-18 21:12:11,802 | INFO | Database tables verified successfully
+2026-05-18 21:12:11,802 | INFO | Database tables initialized successfully
+2026-05-18 21:12:11,839 | INFO | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-18 21:12:11,839 | INFO | [33mPress CTRL+C to quit[0m
+2026-05-18 21:12:11,840 | INFO |  * Restarting with stat
+2026-05-18 21:12:11,976 | INFO | Starting Inventory Management System
+2026-05-18 21:12:11,977 | INFO | Database tables verified successfully
+2026-05-18 21:12:11,977 | INFO | Database tables initialized successfully
+2026-05-18 21:12:11,993 | WARNING |  * Debugger is active!
+2026-05-18 21:12:12,004 | INFO |  * Debugger PIN: 109-532-324
+2026-05-18 21:12:34,385 | INFO | 127.0.0.1 - - [18/May/2026 21:12:34] "GET /assign HTTP/1.1" 200 -
+2026-05-18 21:12:34,396 | INFO | 127.0.0.1 - - [18/May/2026 21:12:34] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:35,640 | INFO | Asset assigned successfully | asset_id=1 | employee_id=2
+2026-05-18 21:12:35,640 | INFO | Asset assigned successfully | asset_id=1 | employee_id=2
+2026-05-18 21:12:35,641 | INFO | 127.0.0.1 - - [18/May/2026 21:12:35] "[32mPOST /assign HTTP/1.1[0m" 302 -
+2026-05-18 21:12:35,651 | INFO | 127.0.0.1 - - [18/May/2026 21:12:35] "GET /assign HTTP/1.1" 200 -
+2026-05-18 21:12:35,660 | INFO | 127.0.0.1 - - [18/May/2026 21:12:35] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:51,350 | INFO | 127.0.0.1 - - [18/May/2026 21:12:51] "GET / HTTP/1.1" 200 -
+2026-05-18 21:12:51,354 | INFO | 127.0.0.1 - - [18/May/2026 21:12:51] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:51,360 | INFO | 127.0.0.1 - - [18/May/2026 21:12:51] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:52,200 | INFO | 127.0.0.1 - - [18/May/2026 21:12:52] "GET /assignments HTTP/1.1" 200 -
+2026-05-18 21:12:52,209 | INFO | 127.0.0.1 - - [18/May/2026 21:12:52] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:59,607 | INFO | 127.0.0.1 - - [18/May/2026 21:12:59] "GET / HTTP/1.1" 200 -
+2026-05-18 21:12:59,611 | INFO | 127.0.0.1 - - [18/May/2026 21:12:59] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:12:59,616 | INFO | 127.0.0.1 - - [18/May/2026 21:12:59] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:00,617 | INFO | 127.0.0.1 - - [18/May/2026 21:13:00] "GET /employees/add HTTP/1.1" 200 -
+2026-05-18 21:13:00,913 | INFO | 127.0.0.1 - - [18/May/2026 21:13:00] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:10,891 | INFO | 127.0.0.1 - - [18/May/2026 21:13:10] "GET / HTTP/1.1" 200 -
+2026-05-18 21:13:10,895 | INFO | 127.0.0.1 - - [18/May/2026 21:13:10] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:10,901 | INFO | 127.0.0.1 - - [18/May/2026 21:13:10] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:12,883 | INFO | 127.0.0.1 - - [18/May/2026 21:13:12] "GET /assets/add HTTP/1.1" 200 -
+2026-05-18 21:13:13,180 | INFO | 127.0.0.1 - - [18/May/2026 21:13:13] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:19,058 | INFO | 127.0.0.1 - - [18/May/2026 21:13:19] "GET / HTTP/1.1" 200 -
+2026-05-18 21:13:19,061 | INFO | 127.0.0.1 - - [18/May/2026 21:13:19] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:19,068 | INFO | 127.0.0.1 - - [18/May/2026 21:13:19] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
+2026-05-18 21:13:20,626 | INFO | 127.0.0.1 - - [18/May/2026 21:13:20] "GET /assignments HTTP/1.1" 200 -
+2026-05-18 21:13:20,636 | INFO | 127.0.0.1 - - [18/May/2026 21:13:20] "[36mGET /design/style.css HTTP/1.1[0m" 304 -
