@@ -1,14 +1,29 @@
-from flask import send_file
+from flask import (
+    send_file,
+    Flask,
+    Response
+)
+
 from openpyxl import Workbook
+
+from services.logger import logger
+
 import sqlite3
 
-DB_PATH = "data/inventory.db"
+
+DB_PATH: str = "data/inventory.db"
 
 
-def register_export_routes(app):
+def register_export_routes(app: Flask) -> None:
+    """
+    Register export-related application routes.
+    """
 
     @app.route("/export")
-    def export_excel():
+    def export_excel() -> Response:
+        """
+        Export application data to an Excel file.
+        """
 
         workbook = Workbook()
 
@@ -105,6 +120,10 @@ def register_export_routes(app):
         file_name = "inventory_export.xlsx"
 
         workbook.save(file_name)
+
+        logger.info(
+            "Excel export generated successfully"
+        )
 
         return send_file(
             file_name,

@@ -1,11 +1,21 @@
 import sqlite3
+
 from models.asset import Asset
 from models.employee import Employee
 
-DB_PATH = "data/inventory.db"
+from services.logger import logger
 
 
-def assign_asset(asset_id, employee_id):
+DB_PATH: str = "data/inventory.db"
+
+
+def assign_asset(asset_id: int,employee_id: int) -> str | None:
+    """
+    Assign an asset to an employee.
+
+    Returns:
+        Error message or None.
+    """
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -24,6 +34,12 @@ def assign_asset(asset_id, employee_id):
             asset = cursor.fetchone()
 
             if not asset or asset[0] != "Available":
+
+                logger.warning(
+                    f"Assignment failed | "
+                    f"asset_id={asset_id} not available"
+                )
+
                 return "❌ Asset not available"
 
             # insert assignment
@@ -47,13 +63,32 @@ def assign_asset(asset_id, employee_id):
                 WHERE id = ?
             """, (asset_id,))
 
+        logger.info(
+            f"Asset assigned successfully | "
+            f"asset_id={asset_id} | "
+            f"employee_id={employee_id}"
+        )
+
         return None
 
     except sqlite3.Error as e:
+
+        logger.error(
+            f"Assignment database error | "
+            f"{e}"
+        )
+
         return f"❌ Database error: {e}"
 
 
-def return_asset(assignment_id):
+def return_asset(assignment_id: int) -> str | None:
+    
+    """
+    Return an assigned asset.
+
+    Returns:
+        Error message or None.
+    """
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -72,6 +107,12 @@ def return_asset(assignment_id):
             row = cursor.fetchone()
 
             if not row:
+
+                logger.warning(
+                    f"Return failed | "
+                    f"assignment_id={assignment_id}"
+                )
+
                 return "❌ Assignment not found"
 
             asset_id = row[0]
@@ -91,13 +132,27 @@ def return_asset(assignment_id):
                 WHERE id = ?
             """, (asset_id,))
 
+        logger.info(
+            f"Asset returned successfully | "
+            f"assignment_id={assignment_id}"
+        )
+
         return None
 
     except sqlite3.Error as e:
+
+        logger.error(
+            f"Return database error | "
+            f"{e}"
+        )
+
         return f"❌ Database error: {e}"
 
 
-def get_all_employees():
+def get_all_employees() -> list[sqlite3.Row]:
+    """
+    Retrieve all employees.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -115,7 +170,10 @@ def get_all_employees():
         return cursor.fetchall()
 
 
-def get_available_assets():
+def get_available_assets() -> list[sqlite3.Row]:
+    """
+    Retrieve all available assets.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -135,7 +193,12 @@ def get_available_assets():
         return cursor.fetchall()
 
 
-def get_active_assignments(sort_by="assigned_date"):
+def get_active_assignments(
+    sort_by: str = "assigned_date"
+) -> list[sqlite3.Row]:
+    """
+    Retrieve all active assignments.
+    """
 
     allowed_sort = {
         "date": "assignments.assigned_date",
@@ -179,7 +242,12 @@ def get_active_assignments(sort_by="assigned_date"):
         return cursor.fetchall()
 
 
-def get_asset_history(asset_id):
+def get_asset_history(
+    asset_id: int
+) -> list[dict]:
+    """
+    Retrieve assignment history for an asset.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -205,7 +273,7 @@ def get_asset_history(asset_id):
 
         rows = cursor.fetchall()
 
-    history = []
+    history: list[dict] = []
 
     for row in rows:
 
@@ -226,7 +294,12 @@ def get_asset_history(asset_id):
     return history
 
 
-def get_asset_details(asset_id):
+def get_asset_details(
+    asset_id: int
+) -> Asset | None:
+    """
+    Retrieve asset details by ID.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 

@@ -1,13 +1,34 @@
 from models.asset import Asset
+
+from services.logger import logger
+
 import sqlite3
 import csv
 
-DB_PATH = "data/inventory.db"
+
+DB_PATH: str = "data/inventory.db"
 
 
-def add_asset(category, brand, serial_number, purchase_date):
+def add_asset(
+    category: str,
+    brand: str,
+    serial_number: str,
+    purchase_date: str | None
+) -> str | None:
+    """
+    Add a new asset to the database.
+
+    Returns:
+        Error message or None.
+    """
 
     if serial_exists(serial_number):
+
+        logger.warning(
+            f"Duplicate serial number detected: "
+            f"{serial_number}"
+        )
+
         return "❌ Serial number already exists"
 
     try:
@@ -30,13 +51,32 @@ def add_asset(category, brand, serial_number, purchase_date):
                 purchase_date
             ))
 
+        logger.info(
+            f"Asset inserted successfully: "
+            f"{serial_number}"
+        )
+
         return None
 
     except sqlite3.IntegrityError:
+
+        logger.error(
+            f"Asset insertion failed: "
+            f"{serial_number}"
+        )
+
         return "❌ Serial number already exists"
 
 
-def import_assets_from_csv(file_path):
+def import_assets_from_csv(
+    file_path: str
+) -> dict[str, int] | str:
+    """
+    Import assets from a CSV file.
+
+    Returns:
+        Import statistics or error message.
+    """
 
     imported = 0
     duplicates = 0
@@ -48,7 +88,11 @@ def import_assets_from_csv(file_path):
 
         cursor = conn.cursor()
 
-        with open(file_path, newline='', encoding='utf-8') as csvfile:
+        with open(
+            file_path,
+            newline='',
+            encoding='utf-8'
+        ) as csvfile:
 
             reader = csv.DictReader(csvfile)
 
@@ -60,6 +104,11 @@ def import_assets_from_csv(file_path):
             ]
 
             if not reader.fieldnames:
+
+                logger.warning(
+                    "Asset CSV import failed: empty file"
+                )
+
                 return "❌ CSV file is empty"
 
             reader.fieldnames = [
@@ -74,6 +123,12 @@ def import_assets_from_csv(file_path):
             ]
 
             if missing:
+
+                logger.warning(
+                    "Asset CSV import failed: "
+                    "invalid headers"
+                )
+
                 return (
                     "❌ Invalid CSV header. "
                     "Required columns: "
@@ -134,6 +189,13 @@ def import_assets_from_csv(file_path):
                 except sqlite3.IntegrityError:
                     duplicates += 1
 
+    logger.info(
+        f"Assets CSV imported | "
+        f"Imported: {imported} | "
+        f"Duplicates: {duplicates} | "
+        f"Invalid: {invalid}"
+    )
+
     return {
         "imported": imported,
         "duplicates": duplicates,
@@ -141,7 +203,12 @@ def import_assets_from_csv(file_path):
     }
 
 
-def get_all_assets(sort_by="status"):
+def get_all_assets(
+    sort_by: str = "status"
+) -> list[sqlite3.Row]:
+    """
+    Retrieve all assets sorted by the selected column.
+    """
 
     allowed_sorts = {
         "status": "status",
@@ -168,7 +235,12 @@ def get_all_assets(sort_by="status"):
         return cursor.fetchall()
 
 
-def get_asset_by_id(asset_id):
+def get_asset_by_id(
+    asset_id: int
+) -> sqlite3.Row | None:
+    """
+    Retrieve an asset by ID.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -185,7 +257,12 @@ def get_asset_by_id(asset_id):
         return cursor.fetchone()
 
 
-def asset_has_active_assignment(asset_id):
+def asset_has_active_assignment(
+    asset_id: int
+) -> bool:
+    """
+    Check whether an asset has an active assignment.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -201,7 +278,10 @@ def asset_has_active_assignment(asset_id):
         return cursor.fetchone() is not None
 
 
-def delete_asset(asset_id):
+def delete_asset(asset_id: int) -> None:
+    """
+    Delete an asset and its assignments.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -219,10 +299,33 @@ def delete_asset(asset_id):
             WHERE id = ?
         """, (asset_id,))
 
+    logger.info(
+        f"Asset deleted successfully: "
+        f"{asset_id}"
+    )
 
-def update_asset(asset_id, category, brand, serial, status):
+
+def update_asset(
+    asset_id: int,
+    category: str,
+    brand: str,
+    serial: str,
+    status: str
+) -> str | None:
+    """
+    Update asset information.
+
+    Returns:
+        Error message or None.
+    """
 
     if serial_exists(serial, asset_id):
+
+        logger.warning(
+            f"Asset update failed due to duplicate "
+            f"serial number: {serial}"
+        )
+
         return "❌ Serial number already exists"
 
     with sqlite3.connect(DB_PATH) as conn:
@@ -256,10 +359,21 @@ def update_asset(asset_id, category, brand, serial, status):
             asset_id
         ))
 
+    logger.info(
+        f"Asset updated successfully: "
+        f"{asset_id}"
+    )
+
     return None
 
 
-def serial_exists(serial_number, exclude_id=None):
+def serial_exists(
+    serial_number: str,
+    exclude_id: int | None = None
+) -> bool:
+    """
+    Check whether a serial number already exists.
+    """
 
     serial_number = serial_number.strip().upper()
 

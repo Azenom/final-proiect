@@ -1,18 +1,28 @@
 from flask import (
     render_template,
-    request
+    request,
+    Flask
 )
 
 from services.search import global_search
+from services.logger import logger
 
 import sqlite3
 
-DB_PATH = "data/inventory.db"
 
-def register_home_routes(app):
+DB_PATH: str = "data/inventory.db"
+
+
+def register_home_routes(app: Flask) -> None:
+    """
+    Register home and dashboard routes.
+    """
 
     @app.route("/")
-    def home():
+    def home() -> str:
+        """
+        Display the application dashboard and search results.
+        """
 
         # Search
         search = request.args.get(
@@ -20,12 +30,17 @@ def register_home_routes(app):
             ""
         ).strip()
 
-        results = {
+        results: dict[str, list] = {
             "employees": [],
             "assets": []
         }
 
         if search:
+
+            logger.info(
+                f"Global search performed: {search}"
+            )
+
             results = global_search(search)
 
         with sqlite3.connect(DB_PATH) as conn:

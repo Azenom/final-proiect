@@ -1,17 +1,19 @@
 from datetime import date
 
-
 class Asset:
+    """
+    Asset model used for asset management operations.
+    """
 
     def __init__(
         self,
-        id,
-        category,
-        brand,
-        serial_number,
-        status,
-        purchase_date=None
-    ):
+        id: int | None,
+        category: str,
+        brand: str,
+        serial_number: str,
+        status: str,
+        purchase_date: str | None = None
+    ) -> None:
 
         self.id = id
         self.category = category
@@ -20,19 +22,31 @@ class Asset:
         self.status = status
         self.purchase_date = purchase_date
 
-    def full_name(self):
+    def full_name(self) -> str:
+        """
+        Return formatted asset name.
+        """
 
         return f"{self.category} - {self.brand}"
 
-    def serial(self):
+    def serial(self) -> str:
+        """
+        Return formatted serial number.
+        """
 
         return f"SN: {self.serial_number}"
 
-    def is_available(self):
+    def is_available(self) -> bool:
+        """
+        Check whether the asset is available.
+        """
 
         return self.status == "Available"
 
-    def normalize(self):
+    def normalize(self) -> None:
+        """
+        Normalize asset data formatting.
+        """
 
         self.category = self.category.strip().title()
 
@@ -55,7 +69,13 @@ class Asset:
                 .strip()
             )
 
-    def validate(self):
+    def validate(self) -> str | None:
+        """
+        Validate asset data.
+
+        Returns:
+            Validation error message or None.
+        """
 
         if not self.category.strip():
             return "❌ Category is required"

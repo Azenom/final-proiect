@@ -1,11 +1,26 @@
 import sqlite3
 
-DB_PATH = "data/inventory.db"
+from services.logger import logger
 
 
-def global_search(search):
+DB_PATH: str = "data/inventory.db"
+
+
+def global_search(
+    search: str
+) -> dict[str, list[sqlite3.Row]]:
+    """
+    Perform a global search across employees and assets.
+
+    Returns:
+        Dictionary containing employee and asset results.
+    """
 
     search_term = f"%{search.strip().lower()}%"
+
+    logger.info(
+        f"Global search executed: {search}"
+    )
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -53,6 +68,12 @@ def global_search(search):
         ))
 
         asset_results = cursor.fetchall()
+
+    logger.info(
+        f"Search completed | "
+        f"Employees: {len(employee_results)} | "
+        f"Assets: {len(asset_results)}"
+    )
 
     return {
         "employees": employee_results,

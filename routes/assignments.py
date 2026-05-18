@@ -3,7 +3,9 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash
+    flash,
+    Flask,
+    Response
 )
 
 from services.assignments import (
@@ -16,11 +18,19 @@ from services.assignments import (
     get_asset_details
 )
 
+from services.logger import logger
 
-def register_assignment_routes(app):
+
+def register_assignment_routes(app: Flask) -> None:
+    """
+    Register assignment-related application routes.
+    """
 
     @app.route("/assign", methods=["GET", "POST"])
-    def assign_asset_route():
+    def assign_asset_route() -> str | Response:
+        """
+        Handle asset assignment operations.
+        """
 
         if request.method == "POST":
 
@@ -28,6 +38,10 @@ def register_assignment_routes(app):
             asset_id = request.form["asset_id"].strip()
 
             if not employee_id or not asset_id:
+
+                logger.warning(
+                    "Assignment attempt with missing fields"
+                )
 
                 flash("❌ Please fill all required fields")
 
@@ -41,8 +55,23 @@ def register_assignment_routes(app):
             )
 
             if result:
+
+                logger.warning(
+                    f"Asset assignment failed | "
+                    f"asset_id={asset_id} | "
+                    f"employee_id={employee_id}"
+                )
+
                 flash(result)
+
             else:
+
+                logger.info(
+                    f"Asset assigned successfully | "
+                    f"asset_id={asset_id} | "
+                    f"employee_id={employee_id}"
+                )
+
                 flash("✅ Asset assigned successfully")
 
             return redirect(
@@ -60,7 +89,10 @@ def register_assignment_routes(app):
         )
 
     @app.route("/assignments")
-    def list_assignments():
+    def list_assignments() -> str:
+        """
+        Display all active assignments.
+        """
 
         sort_by = request.args.get("sort", "date")
 
@@ -72,13 +104,31 @@ def register_assignment_routes(app):
         )
 
     @app.route("/return/<int:assignment_id>")
-    def return_asset_route(assignment_id):
+    def return_asset_route(
+        assignment_id: int
+    ) -> Response:
+        """
+        Handle asset return operations.
+        """
 
         result = return_asset(assignment_id)
 
         if result:
+
+            logger.warning(
+                f"Asset return failed | "
+                f"assignment_id={assignment_id}"
+            )
+
             flash(result)
+
         else:
+
+            logger.info(
+                f"Asset returned successfully | "
+                f"assignment_id={assignment_id}"
+            )
+
             flash("✅ Asset returned successfully")
 
         return redirect(
@@ -86,7 +136,10 @@ def register_assignment_routes(app):
         )
 
     @app.route("/asset/<int:asset_id>")
-    def asset_history(asset_id):
+    def asset_history(asset_id: int) -> str:
+        """
+        Display asset assignment history.
+        """
 
         history = get_asset_history(asset_id)
 

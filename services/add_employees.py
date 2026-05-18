@@ -1,12 +1,32 @@
 import sqlite3
 import csv
+
 from models.employee import Employee
+from services.logger import logger
 
-DB_PATH = "data/inventory.db"
 
-def add_employee(first_name, last_name, department):
+DB_PATH: str = "data/inventory.db"
+
+
+def add_employee(
+    first_name: str,
+    last_name: str,
+    department: str
+) -> str | None:
+    """
+    Add a new employee to the database.
+
+    Returns:
+        Error message or None.
+    """
 
     if employee_exists(first_name, last_name):
+
+        logger.warning(
+            f"Duplicate employee detected | "
+            f"{first_name} {last_name}"
+        )
+
         return "❌ Employee already exists"
 
     try:
@@ -27,12 +47,32 @@ def add_employee(first_name, last_name, department):
                 department
             ))
 
+        logger.info(
+            f"Employee added successfully | "
+            f"{first_name} {last_name}"
+        )
+
         return None
 
     except sqlite3.Error as e:
+
+        logger.error(
+            f"Employee insertion failed | "
+            f"{e}"
+        )
+
         return f"❌ Database error: {e}"
 
-def import_employees_from_csv(file_path):
+
+def import_employees_from_csv(
+    file_path: str
+) -> dict[str, int] | str:
+    """
+    Import employees from a CSV file.
+
+    Returns:
+        Import statistics or error message.
+    """
 
     imported = 0
     duplicates = 0
@@ -57,6 +97,11 @@ def import_employees_from_csv(file_path):
             ]
 
             if not reader.fieldnames:
+
+                logger.warning(
+                    "Employee CSV import failed: empty file"
+                )
+
                 return "❌ CSV file is empty"
 
             reader.fieldnames = [
@@ -71,6 +116,12 @@ def import_employees_from_csv(file_path):
             ]
 
             if missing:
+
+                logger.warning(
+                    "Employee CSV import failed: "
+                    "invalid headers"
+                )
+
                 return (
                     "❌ Invalid CSV header. "
                     "Required columns: "
@@ -129,13 +180,26 @@ def import_employees_from_csv(file_path):
 
                 imported += 1
 
+    logger.info(
+        f"Employees CSV imported | "
+        f"Imported: {imported} | "
+        f"Duplicates: {duplicates} | "
+        f"Invalid: {invalid}"
+    )
+
     return {
         "imported": imported,
         "duplicates": duplicates,
         "invalid": invalid
     }
 
-def get_all_employees_list(sort_by="name"):
+
+def get_all_employees_list(
+    sort_by: str = "name"
+) -> list[sqlite3.Row]:
+    """
+    Retrieve all employees sorted by the selected column.
+    """
 
     allowed_sort = {
         "name": "first_name",
@@ -160,7 +224,13 @@ def get_all_employees_list(sort_by="name"):
 
         return cursor.fetchall()
 
-def employee_has_active_assignment(employee_id):
+
+def employee_has_active_assignment(
+    employee_id: int
+) -> bool:
+    """
+    Check whether an employee has active assignments.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -175,7 +245,11 @@ def employee_has_active_assignment(employee_id):
 
         return cursor.fetchone() is not None
 
-def delete_employee(employee_id):
+
+def delete_employee(employee_id: int) -> None:
+    """
+    Delete an employee and related assignments.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -193,7 +267,18 @@ def delete_employee(employee_id):
             WHERE id = ?
         """, (employee_id,))
 
-def get_employee_by_id(employee_id):
+    logger.info(
+        f"Employee deleted successfully | "
+        f"employee_id={employee_id}"
+    )
+
+
+def get_employee_by_id(
+    employee_id: int
+) -> sqlite3.Row | None:
+    """
+    Retrieve an employee by ID.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -209,9 +294,31 @@ def get_employee_by_id(employee_id):
 
         return cursor.fetchone()
 
-def update_employee(employee_id, first_name, last_name, department):
 
-    if employee_exists(first_name, last_name, employee_id):
+def update_employee(
+    employee_id: int,
+    first_name: str,
+    last_name: str,
+    department: str
+) -> str | None:
+    """
+    Update employee information.
+
+    Returns:
+        Error message or None.
+    """
+
+    if employee_exists(
+        first_name,
+        last_name,
+        employee_id
+    ):
+
+        logger.warning(
+            f"Employee update failed due to duplicate | "
+            f"employee_id={employee_id}"
+        )
+
         return "❌ Employee already exists"
 
     with sqlite3.connect(DB_PATH) as conn:
@@ -233,9 +340,22 @@ def update_employee(employee_id, first_name, last_name, department):
             employee_id
         ))
 
+    logger.info(
+        f"Employee updated successfully | "
+        f"employee_id={employee_id}"
+    )
+
     return None
 
-def employee_exists(first_name, last_name, exclude_id=None):
+
+def employee_exists(
+    first_name: str,
+    last_name: str,
+    exclude_id: int | None = None
+) -> bool:
+    """
+    Check whether an employee already exists.
+    """
 
     first_name = first_name.strip().lower()
     last_name = last_name.strip().lower()
@@ -293,3 +413,4 @@ def employee_exists(first_name, last_name, exclude_id=None):
             ))
 
         return cursor.fetchone() is not None
+    

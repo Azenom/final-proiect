@@ -3,7 +3,9 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash
+    flash,
+    Flask,
+    Response
 )
 
 from services.add_employees import (
@@ -16,14 +18,23 @@ from services.add_employees import (
     employee_has_active_assignment
 )
 
+from services.logger import logger
+
 from models.employee import Employee
 
 import os
 
-def register_employee_routes(app):
+
+def register_employee_routes(app: Flask) -> None:
+    """
+    Register employee-related application routes.
+    """
 
     @app.route("/employees/add", methods=["GET", "POST"])
-    def add_employee_route():
+    def add_employee_route() -> str | Response:
+        """
+        Handle employee creation and CSV imports.
+        """
 
         # Manual add
         if request.method == "POST" and "add_employee" in request.form:
@@ -45,6 +56,10 @@ def register_employee_routes(app):
 
             if error:
 
+                logger.warning(
+                    f"Employee validation failed: {error}"
+                )
+
                 flash(error)
 
                 return redirect(
@@ -59,11 +74,21 @@ def register_employee_routes(app):
 
             if db_error:
 
+                logger.warning(
+                    f"Employee creation failed | "
+                    f"{employee.full_name()}"
+                )
+
                 flash(db_error)
 
                 return redirect(
                     url_for("add_employee_route")
                 )
+
+            logger.info(
+                f"Employee added successfully | "
+                f"{employee.full_name()}"
+            )
 
             flash("✅ Employee added successfully")
 
@@ -77,6 +102,11 @@ def register_employee_routes(app):
             file = request.files.get("csv_file")
 
             if not file or file.filename == "":
+
+                logger.warning(
+                    "Employee CSV import attempted "
+                    "without file"
+                )
 
                 flash("❌ Please select a CSV file")
 
@@ -96,11 +126,23 @@ def register_employee_routes(app):
 
                 if isinstance(result, str):
 
+                    logger.warning(
+                        f"Employee CSV import failed: "
+                        f"{result}"
+                    )
+
                     flash(result)
 
                     return redirect(
                         url_for("add_employee_route")
                     )
+
+                logger.info(
+                    f"Employees CSV imported | "
+                    f"Imported: {result['imported']} | "
+                    f"Duplicates: {result['duplicates']} | "
+                    f"Invalid: {result['invalid']}"
+                )
 
                 flash(
                     f"✅ Imported {result['imported']} employees | "
@@ -127,9 +169,20 @@ def register_employee_routes(app):
         )
 
     @app.route("/employees/delete/<int:employee_id>")
-    def delete_employee_route(employee_id):
+    def delete_employee_route(
+        employee_id: int
+    ) -> Response:
+        """
+        Delete an employee if no active assignments exist.
+        """
 
         if employee_has_active_assignment(employee_id):
+
+            logger.warning(
+                f"Attempted deletion of employee "
+                f"with active assignments | "
+                f"employee_id={employee_id}"
+            )
 
             flash(
                 "❌ Cannot delete employee "
@@ -142,6 +195,11 @@ def register_employee_routes(app):
 
         delete_employee(employee_id)
 
+        logger.info(
+            f"Employee deleted successfully | "
+            f"employee_id={employee_id}"
+        )
+
         flash("✅ Employee deleted")
 
         return redirect(
@@ -152,7 +210,12 @@ def register_employee_routes(app):
         "/employees/edit/<int:employee_id>",
         methods=["GET", "POST"]
     )
-    def edit_employee(employee_id):
+    def edit_employee(
+        employee_id: int
+    ) -> str | Response:
+        """
+        Handle employee editing operations.
+        """
 
         if request.method == "POST":
 
@@ -173,6 +236,11 @@ def register_employee_routes(app):
 
             if error:
 
+                logger.warning(
+                    f"Employee update validation failed | "
+                    f"employee_id={employee_id}"
+                )
+
                 flash(error)
 
                 return redirect(
@@ -191,6 +259,11 @@ def register_employee_routes(app):
 
             if result:
 
+                logger.warning(
+                    f"Employee update failed | "
+                    f"employee_id={employee_id}"
+                )
+
                 flash(result)
 
                 return redirect(
@@ -199,6 +272,11 @@ def register_employee_routes(app):
                         employee_id=employee_id
                     )
                 )
+
+            logger.info(
+                f"Employee updated successfully | "
+                f"employee_id={employee_id}"
+            )
 
             flash("✅ Employee updated successfully")
 
@@ -212,4 +290,3 @@ def register_employee_routes(app):
             "employees/edit.html",
             employee=employee
         )
-    

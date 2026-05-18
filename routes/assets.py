@@ -3,7 +3,9 @@ from flask import (
     request,
     redirect,
     url_for,
-    flash
+    flash,
+    Flask,
+    Response
 )
 
 from services.add_assets import (
@@ -16,15 +18,23 @@ from services.add_assets import (
     asset_has_active_assignment
 )
 
+from services.logger import logger
+
 from models.asset import Asset
 
 import os
 
 
-def register_asset_routes(app):
+def register_asset_routes(app: Flask) -> None:
+    """
+    Register asset-related application routes.
+    """
 
     @app.route("/assets/add", methods=["GET", "POST"])
-    def add_asset_route():
+    def add_asset_route() -> str | Response:
+        """
+        Handle asset creation and CSV asset imports.
+        """
 
         # Manual add
         if request.method == "POST" and "add_asset" in request.form:
@@ -48,7 +58,13 @@ def register_asset_routes(app):
             error = asset.validate()
 
             if error:
+
+                logger.warning(
+                    f"Asset validation failed: {error}"
+                )
+
                 flash(error)
+
                 return redirect(url_for("add_asset_route"))
 
             db_error = add_asset(
@@ -59,8 +75,20 @@ def register_asset_routes(app):
             )
 
             if db_error:
+
+                logger.warning(
+                    f"Asset creation failed: "
+                    f"{asset.serial_number}"
+                )
+
                 flash(db_error)
+
                 return redirect(url_for("add_asset_route"))
+
+            logger.info(
+                f"Asset added successfully: "
+                f"{asset.serial_number}"
+            )
 
             flash("✅ Asset added successfully")
 
@@ -72,7 +100,13 @@ def register_asset_routes(app):
             file = request.files.get("csv_file")
 
             if not file or file.filename == "":
+
+                logger.warning(
+                    "CSV import attempted without file"
+                )
+
                 flash("❌ Please select a CSV file")
+
                 return redirect(url_for("add_asset_route"))
 
             upload_path = "temp_assets.csv"
@@ -84,8 +118,21 @@ def register_asset_routes(app):
                 result = import_assets_from_csv(upload_path)
 
                 if isinstance(result, str):
+
+                    logger.warning(
+                        f"CSV import failed: {result}"
+                    )
+
                     flash(result)
+
                     return redirect(url_for("add_asset_route"))
+
+                logger.info(
+                    f"Assets CSV imported | "
+                    f"Imported: {result['imported']} | "
+                    f"Duplicates: {result['duplicates']} | "
+                    f"Invalid: {result['invalid']}"
+                )
 
                 flash(
                     f"✅ Imported {result['imported']} assets | "
@@ -110,9 +157,17 @@ def register_asset_routes(app):
         )
 
     @app.route("/assets/delete/<int:asset_id>")
-    def delete_asset_route(asset_id):
+    def delete_asset_route(asset_id: int) -> Response:
+        """
+        Delete an asset if it has no active assignment.
+        """
 
         if asset_has_active_assignment(asset_id):
+
+            logger.warning(
+                f"Attempted deletion of assigned asset: "
+                f"{asset_id}"
+            )
 
             flash("❌ Cannot delete assigned asset")
 
@@ -120,12 +175,19 @@ def register_asset_routes(app):
 
         delete_asset(asset_id)
 
+        logger.info(
+            f"Asset deleted successfully: {asset_id}"
+        )
+
         flash("✅ Asset deleted")
 
         return redirect(url_for("add_asset_route"))
 
     @app.route("/assets/edit/<int:asset_id>", methods=["GET", "POST"])
-    def edit_asset(asset_id):
+    def edit_asset(asset_id: int) -> str | Response:
+        """
+        Handle asset editing operations.
+        """
 
         if request.method == "POST":
 
@@ -147,6 +209,12 @@ def register_asset_routes(app):
             error = asset.validate()
 
             if error:
+
+                logger.warning(
+                    f"Asset update validation failed: "
+                    f"{asset_id}"
+                )
+
                 flash(error)
 
                 return redirect(
@@ -165,6 +233,12 @@ def register_asset_routes(app):
             )
 
             if result:
+
+                logger.warning(
+                    f"Asset update failed: "
+                    f"{asset_id}"
+                )
+
                 flash(result)
 
                 return redirect(
@@ -173,6 +247,11 @@ def register_asset_routes(app):
                         asset_id=asset_id
                     )
                 )
+
+            logger.info(
+                f"Asset updated successfully: "
+                f"{asset_id}"
+            )
 
             flash("✅ Asset updated successfully")
 

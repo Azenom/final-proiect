@@ -1,9 +1,13 @@
 import sqlite3
 
-DB_PATH = "data/inventory.db"
+from services.logger import logger
 
+DB_PATH: str = "data/inventory.db"
 
-def create_tables():
+def create_tables() -> None:
+    """
+    Create database tables if they do not exist.
+    """
 
     with sqlite3.connect(DB_PATH) as conn:
 
@@ -50,3 +54,5 @@ def create_tables():
                     REFERENCES employees(id)
             );
         """)
+
+        logger.info("Database tables verified successfully")
